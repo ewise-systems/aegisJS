@@ -2,17 +2,13 @@ const fs = require('fs')
 const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser');
-const useragent = require('express-useragent');
-const device = require('express-device');
 const cors = require('cors');
 
 const port = 3000;
 const app = express();
 
-app.use(useragent.express());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-app.use(device.capture({ parseUserAgent: true }));
 app.use(cors());
 
 app.get('/', async (req, res) => {
