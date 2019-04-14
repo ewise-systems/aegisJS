@@ -11,7 +11,7 @@ window.ew = window.ew || {};
 const ew = window.ew;
 
 ew.init = curry((url, token) => {
-    const task = compose(chain(fetchToTask), taskFetch)
+    const task = compose(chain(fetchToTask), taskFetch);
     return {
         public: {
             getAegisDetails: task(url, 'GET', null, null).fork,
