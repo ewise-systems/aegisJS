@@ -117,6 +117,6 @@ class Left extends Either {
 }
 
 
-module.exports.Either = Either
-module.exports.Left = Left
-module.exports.Right = Right
+module.exports.Either = Either;
+module.exports.Left = Left;
+module.exports.Right = Right;

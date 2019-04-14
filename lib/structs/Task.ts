@@ -1,6 +1,6 @@
 // https://mostly-adequate.gitbooks.io/mostly-adequate-guide/appendix_b.html#task
 // @ts-ignore
-const { compose } = require("ramda")
+const { compose } = require("ramda");
 
 // @ts-ignore
 class Task {
@@ -44,4 +44,4 @@ class Task {
   }
 }
 
-module.exports = Task
+module.exports = Task;

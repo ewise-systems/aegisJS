@@ -59,4 +59,4 @@ class Maybe {
   }
 }
 
-module.exports = Maybe
+module.exports = Maybe;

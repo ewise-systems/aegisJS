@@ -42,4 +42,4 @@ class Tuple {
   }
 }
 
-module.exports = Tuple
+module.exports = Tuple;

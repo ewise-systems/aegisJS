@@ -53,4 +53,4 @@ class Identity {
   }
 }
 
-module.exports = Identity
+module.exports = Identity;
