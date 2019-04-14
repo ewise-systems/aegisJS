@@ -38,15 +38,11 @@ var fs = require('fs');
 var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
-var useragent = require('express-useragent');
-var device = require('express-device');
 var cors = require('cors');
 var port = 3000;
 var app = express();
-app.use(useragent.express());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(device.capture({ parseUserAgent: true }));
 app.use(cors());
 app.get('/', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var lib;
