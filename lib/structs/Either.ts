@@ -1,117 +1,118 @@
+// https://mostly-adequate.gitbooks.io/mostly-adequate-guide/appendix_b.html#either
 // @ts-ignore
-const { inspect } = require('util')
+const { inspect } = require('util');
 
 class Either {
   constructor(x) {
     // @ts-ignore
-    this.$value = x
+    this.$value = x;
   }
 
   // ----- Pointed (Either a)
   static of(x) {
-    return new Right(x)
+    return new Right(x);
   }
 }
 
 // @ts-ignore
 class Right extends Either {
   get isLeft() {
-    return false
+    return false;
   }
 
   get isRight() {
-    return true
+    return true;
   }
 
   static of(x) {
-    throw new Error('`of` called on class Right (value) instead of Either (type)')
+    throw new Error('`of` called on class Right (value) instead of Either (type)');
   }
 
   inspect() {
     // @ts-ignore
-    return `Right(${inspect(this.$value)})`
+    return `Right(${inspect(this.$value)})`;
   }
 
   // ----- Functor (Either a)
   map(fn) {
     // @ts-ignore
-    return Either.of(fn(this.$value))
+    return Either.of(fn(this.$value));
   }
 
   // ----- Applicative (Either a)
   ap(f) {
     // @ts-ignore
-    return f.map(this.$value)
+    return f.map(this.$value);
   }
 
   // ----- Monad (Either a)
   chain(fn) {
     // @ts-ignore
-    return fn(this.$value)
+    return fn(this.$value);
   }
 
   fold() {
     // @ts-ignore
-    return this.$value
+    return this.$value;
   }
 
   // ----- Traversable (Either a)
   sequence(of) {
     // @ts-ignore
-    return this.traverse(of, x=>x)
+    return this.traverse(of, x=>x);
   }
 
   traverse(of, fn) {
     // @ts-ignore
-    fn(this.$value).map(Either.of)
+    fn(this.$value).map(Either.of);
   }
 }
 
 // @ts-ignore
 class Left extends Either {
   get isLeft() {
-    return true
+    return true;
   }
 
   get isRight() {
-    return false
+    return false;
   }
 
   static of(x) {
-    throw new Error('`of` called on class Left (value) instead of Either (type)')
+    throw new Error('`of` called on class Left (value) instead of Either (type)');
   }
 
   inspect() {
     // @ts-ignore
-    return `Left(${inspect(this.$value)})`
+    return `Left(${inspect(this.$value)})`;
   }
 
   // ----- Functor (Either a)
   map() {
-    return this
+    return this;
   }
 
   // ----- Applicative (Either a)
   ap() {
-    return this
+    return this;
   }
 
   // ----- Monad (Either a)
   chain() {
-    return this
+    return this;
   }
 
   fold() {
-    return this
+    return this;
   }
 
   // ----- Traversable (Either a)
   sequence(of) {
-    return of(this)
+    return of(this);
   }
 
   traverse(of, fn) {
-    return of(this)
+    return of(this);
   }
 }
 

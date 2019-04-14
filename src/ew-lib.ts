@@ -13,12 +13,19 @@ const ew = window.ew;
 ew.init = curry((url, token) => {
     const task = compose(chain(fetchToTask), taskFetch)
     return {
-        getAegisDetails: task(url, 'GET', null, null).fork,
-        register: null,
-        login: null,
-        getInstitutions: null,
-        startAggregation: null, // Provides phase polling, OTP, and ACA end callbacks
-        stopAggregation: null,
-        resumeAggregation: null
+        public: {
+            getAegisDetails: task(url, 'GET', null, null).fork,
+            runBrowser: null
+        },
+        user: {
+            register: null,
+            login: null
+        },
+        ota: {
+            getInstitutions: null,
+            startAggregation: null, // Provides phase polling, OTP, and ACA end callbacks
+            stopAggregation: null,
+            resumeAggregation: null
+        }
     };
 });

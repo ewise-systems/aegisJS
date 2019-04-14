@@ -7,4 +7,4 @@ const liftA3 = curry((f, a, b, c, x) => x.map(a).map(f).ap(x.map(b)).ap(x.map(c)
 
 module.exports = {
     liftA3
-}
+};

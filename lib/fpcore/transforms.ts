@@ -7,4 +7,4 @@ const promiseToTask = x => new Task((reject, resolve) => x.then(resolve).catch(r
 
 module.exports = {
     promiseToTask
-}
+};

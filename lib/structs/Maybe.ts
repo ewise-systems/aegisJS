@@ -1,3 +1,4 @@
+// https://mostly-adequate.gitbooks.io/mostly-adequate-guide/appendix_b.html#maybe
 // @ts-ignore
 class Maybe {
   get isNothing() {
