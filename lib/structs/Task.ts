@@ -1,6 +1,8 @@
 // https://mostly-adequate.gitbooks.io/mostly-adequate-guide/appendix_b.html#task
 // @ts-ignore
 const { compose } = require("ramda");
+// @ts-ignore
+const { taskToPromise } = require("../fpcore/transforms");
 
 // @ts-ignore
 class Task {
@@ -41,6 +43,10 @@ class Task {
 
   fold() {
     return this.chain(x => x);
+  }
+
+  toPromise() {
+    return taskToPromise(this);
   }
 }
 

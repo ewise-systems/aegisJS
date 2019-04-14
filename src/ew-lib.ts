@@ -1,7 +1,7 @@
 // @ts-ignore
 const { compose, chain, curry } = require("ramda/es");
 // @ts-ignore
-const { taskFetch } = require("../lib/hof/taskFetch");
+const { callAjax } = require("../lib/hof/callAjax");
 // @ts-ignore
 const { fetchToTask } = require("../lib/hof/fetchToTask");
 
@@ -11,10 +11,10 @@ window.ew = window.ew || {};
 const ew = window.ew;
 
 ew.init = curry((url, token) => {
-    const task = compose(chain(fetchToTask), taskFetch);
+    const task = compose(chain(fetchToTask), callAjax);
     return {
         public: {
-            getAegisDetails: task(url, 'GET', null, null).fork,
+            getAegisDetails: task(url, 'GET', null, null),
             runBrowser: null
         },
         user: {
