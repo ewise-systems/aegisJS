@@ -1,9 +1,9 @@
 // @ts-ignore
 const { compose, chain, curry } = require("ramda/es");
 // @ts-ignore
-const taskFetch = require("../lib/hoc/taskFetch");
+const { taskFetch } = require("../lib/hoc/taskFetch");
 // @ts-ignore
-const fetchToTask = require("../lib/hoc/fetchToTask");
+const { fetchToTask } = require("../lib/hoc/fetchToTask");
 
 // @ts-ignore
 window.ew = window.ew || {};

@@ -9,4 +9,7 @@ const getFetchPromise = x => x.json();
 const fetchToTask = compose(promiseToTask, getFetchPromise);
 
 // @ts-ignore
-module.exports = fetchToTask;
+module.exports = {
+    getFetchPromise,
+    fetchToTask
+};

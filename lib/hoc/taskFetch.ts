@@ -9,6 +9,8 @@ const Identity = require("../structs/Identity");
 const Maybe = require("../structs/Maybe");
 // @ts-ignore
 const { liftA3 } = require("../fpcore/liftA");
+// @ts-ignore
+const { addProp } = require("../fpcore/pointfree");
 
 interface FetchOptions {
     method: string;
@@ -38,10 +40,6 @@ const addBody = curry((body: string, obj: FetchOptions) =>
     Maybe.of(body).map(JSON.stringify).map(addProp(obj, 'body')).fold({})
 );
 
-const addProp = curry((obj, key, value) =>
-    ({ ...obj, [key]: value })
-);
-
 // @ts-ignore
 const taskFetch = curry((url: string, method: string, token: string, body: any) =>
     liftA3(
@@ -55,4 +53,10 @@ const taskFetch = curry((url: string, method: string, token: string, body: any) 
 );
 
 // @ts-ignore
-module.exports = taskFetch;
+module.exports = {
+    sendRequest,
+    addMethod,
+    addAuthHeader,
+    addBody,
+    taskFetch
+};
