@@ -2,7 +2,7 @@
   "name": "ew-lib",
   "version": "0.0.1",
   "description": "Open source library for interacting with eWise Systems' Aegis 2.0 architecture",
-  "main": "index.js",
+  "main": "src/ew-lib.js",
   "scripts": {
     "clean": "rm -rf build",
     "prebuid": "npm run clean",
