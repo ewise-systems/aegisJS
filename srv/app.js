@@ -40,31 +40,14 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var useragent = require('express-useragent');
 var device = require('express-device');
-var port = 3000;
 var cors = require('cors');
+var port = 3000;
 var app = express();
 app.use(useragent.express());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(device.capture({ parseUserAgent: true }));
-// Add headers
-app.use(function (req, res, next) {
-    // Website you wish to allow to connect
-    // res.setHeader('Access-Control-Allow-Origin', 'https://pdv.ewise.com:8443/');
-    // Request methods you wish to allow
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    // Pass to next layer of middleware
-    next();
-});
 app.use(cors());
-app.options('*', cors());
-app.options('/*', function (req, res, next) { return res.sendStatus(200); });
 app.get('/', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var lib;
     return __generator(this, function (_a) {
@@ -76,9 +59,18 @@ app.get('/', function (req, res) { return __awaiter(_this, void 0, void 0, funct
 app.get('/ew.js', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var lib;
     return __generator(this, function (_a) {
-        lib = path.resolve(__dirname, '../dist/index.js');
+        lib = path.resolve(__dirname, '../dist/ew-lib.js');
         res.sendFile(lib);
         return [2 /*return*/];
     });
 }); });
-app.listen(port, function () { return console.log("Example app listening on port " + port + "!"); });
+app.get('/samples/:file', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+    var file, lib;
+    return __generator(this, function (_a) {
+        file = req.params.file;
+        lib = path.resolve(__dirname, "../samples/" + file);
+        res.sendFile(lib);
+        return [2 /*return*/];
+    });
+}); });
+app.listen(port, function () { return console.log("Test app listening on port " + port + "!"); });
