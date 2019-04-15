@@ -27,4 +27,9 @@ app.get('/samples/:file', async (req, res) => {
     res.sendFile(lib);
 })
 
+app.get('/json', async (req, res) => {
+    res.write(JSON.stringify({ a: 1, b: 2 }));
+    res.end();
+})
+
 app.listen(port, () => console.log(`Test app listening on port ${port}!`));

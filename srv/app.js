@@ -69,4 +69,11 @@ app.get('/samples/:file', function (req, res) { return __awaiter(_this, void 0, 
         return [2 /*return*/];
     });
 }); });
+app.get('/json', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        res.write(JSON.stringify({ a: 1, b: 2 }));
+        res.end();
+        return [2 /*return*/];
+    });
+}); });
 app.listen(port, function () { return console.log("Test app listening on port " + port + "!"); });
