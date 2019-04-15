@@ -2,6 +2,7 @@ build/*
 dist/*
 node_modules/*
 artifact/*
+srv/app.js
 
 # Logs
 logs

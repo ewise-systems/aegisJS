@@ -1,14 +1,14 @@
 {
-  "name": "ew-lib",
+  "name": "eww",
   "version": "0.0.1",
   "description": "Open source library for interacting with eWise Systems' Aegis 2.0 architecture",
-  "main": "index.js",
+  "main": "src/eww.js",
   "scripts": {
-    "build": "npm run build:webpack",
-    "build:tsc": "tsc --outDir build src/index.ts",
-    "build:webpack": "npm run build:tsc && npx webpack --config webpack.config.js",
-    "build:srv": "tsc srv/app.ts",
-    "start": "node srv/app.js",
+    "clean": "rm -rf build",
+    "prebuid": "npm run clean",
+    "build": "npm run build:tsc && webpack --config webpack.config.js",
+    "build:tsc": "tsc --target ES5 --outDir build src/*.ts lib/**/*.ts",
+    "start": "tsc srv/app.ts && npm run build && node srv/app.js",
     "test": "mocha"
   },
   "keywords": [
@@ -22,12 +22,16 @@
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "express": "^4.16.4",
-    "express-device": "^0.4.2",
-    "express-useragent": "^1.0.12",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
   },
   "dependencies": {
+    "@types/ramda": "^0.26.6",
+    "ramda": "^0.26.1",
     "whatwg-fetch": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ewise-systems/eww.git"
   }
 }
