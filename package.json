@@ -1,8 +1,8 @@
 {
-  "name": "ew-lib",
+  "name": "eww",
   "version": "0.0.1",
   "description": "Open source library for interacting with eWise Systems' Aegis 2.0 architecture",
-  "main": "src/ew-lib.js",
+  "main": "src/eww.js",
   "scripts": {
     "clean": "rm -rf build",
     "prebuid": "npm run clean",
@@ -32,6 +32,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:ewise-systems/ew-lib.git"
+    "url": "git@github.com:ewise-systems/eww.git"
   }
 }

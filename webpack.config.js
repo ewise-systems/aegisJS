@@ -2,9 +2,9 @@ const path = require('path');
 
 module.exports = {
   mode: "development",
-  entry: './build/src/ew-lib.js',
+  entry: './build/src/eww.js',
   output: {
-    filename: 'ew-lib.js',
+    filename: 'eww.js',
     path: path.resolve(__dirname, 'dist')
   }
 };
