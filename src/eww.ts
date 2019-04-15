@@ -9,14 +9,14 @@ const eww = {
     runBrowser: requestToAegis('GET', null, null, '/public/browser'),
     register: pin => null,
     login: pin => null,
-    initOTA: curry(jwt => {
-        // const [url, user] = decodeToken(jwt);
-        return {
-            getInstitutions: null,
-            startAggregation: null, // Provides phase polling, OTP, and ACA end callbacks
-            stopAggregation: null,
-            resumeAggregation: null
-        }
+    initOTA: jwt => ({
+        getInstitutions: (instCode = '') =>
+            requestToAegis('GET', jwt, null, `/ota/institutions/${instCode}`)(jwt),
+        startAggregation: () => { // Provides phase polling, error, OTP, and ACA end callbacks
+
+        },
+        stopAggregation: null,
+        resumeAggregation: null
     })
 };
 
