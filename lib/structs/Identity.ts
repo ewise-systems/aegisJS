@@ -1,6 +1,8 @@
 // https://mostly-adequate.gitbooks.io/mostly-adequate-guide/appendix_b.html#identity
 // @ts-ignore
 const { inspect } = require('util');
+// @ts-ignore
+const { id } = require("../fpcore/pointfree");
 
 // @ts-ignore
 class Identity {
@@ -44,7 +46,7 @@ class Identity {
   // ----- Traversable Identity
   sequence(of) {
     // @ts-ignore
-    return this.traverse(of, x => x);
+    return this.traverse(of, id);
   }
 
   traverse(of, fn) {

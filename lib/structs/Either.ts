@@ -1,6 +1,8 @@
 // https://mostly-adequate.gitbooks.io/mostly-adequate-guide/appendix_b.html#either
 // @ts-ignore
 const { inspect } = require('util');
+// @ts-ignore
+const { id } = require("../fpcore/pointfree");
 
 class Either {
   constructor(x) {
@@ -59,7 +61,7 @@ class Right extends Either {
   // ----- Traversable (Either a)
   sequence(of) {
     // @ts-ignore
-    return this.traverse(of, x=>x);
+    return this.traverse(of, id);
   }
 
   traverse(of, fn) {
