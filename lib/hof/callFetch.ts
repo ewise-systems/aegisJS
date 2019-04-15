@@ -24,7 +24,7 @@ interface FetchOptions {
 
 const sendRequest = curry((url, method, token, body) =>
     new Task((reject, result) =>
-        fetch(url, {...method, ...token, ...body}).then(result).catch(reject)
+        fetch(url, {...method, headers: {...token}, ...body}).then(result).catch(reject)
     )
 );
 
@@ -33,7 +33,7 @@ const addMethod = curry((method: string, obj: FetchOptions) =>
 );
 
 const addAuthHeader = curry((token: string, obj: FetchOptions) =>
-    Maybe.of(token).map(concat('Bearer: ')).map(addProp(obj, 'Authorization')).fold({})
+    Maybe.of(token).map(concat('Bearer ')).map(addProp(obj, 'Authorization')).fold({})
 );
 
 const addBody = curry((body: string, obj: FetchOptions) =>
