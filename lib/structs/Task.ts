@@ -1,6 +1,8 @@
 // https://mostly-adequate.gitbooks.io/mostly-adequate-guide/appendix_b.html#task
 // @ts-ignore
 const { compose } = require("ramda");
+// @ts-ignore
+const { id } = require("../fpcore/pointfree");
 
 // @ts-ignore
 class Task {
@@ -40,7 +42,7 @@ class Task {
   }
 
   fold() {
-    return this.chain(x => x);
+    return this.chain(id);
   }
 }
 
