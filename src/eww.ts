@@ -1,6 +1,4 @@
 // @ts-ignore
-const { curry } = require("ramda/es");
-// @ts-ignore
 const { requestToAegis } = require("../lib/hof/requestToAegis");
 
 // @ts-ignore

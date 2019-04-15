@@ -24,7 +24,12 @@ interface FetchOptions {
 
 const sendRequest = curry((url, method, token, body) =>
     new Task((reject, result) =>
-        fetch(url, {...method, headers: {...token}, ...body}).then(result).catch(reject)
+        fetch(url, {...method, headers: {...token}, ...body})
+        .then(async x => {
+            const data = await x.json();
+            return x.status === 200 ? result(data) : reject(data)
+        })
+        .catch(reject)
     )
 );
 
