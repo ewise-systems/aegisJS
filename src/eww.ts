@@ -10,19 +10,13 @@ const ew = window.ew;
 
 ew.init = curry((url, token) => {
     return {
-        public: {
-            getAegisDetails: fetchMonad(url, 'GET', null, null),
-            runBrowser: null
-        },
-        user: {
-            register: null,
-            login: null
-        },
-        ota: {
-            getInstitutions: null,
-            startAggregation: null, // Provides phase polling, OTP, and ACA end callbacks
-            stopAggregation: null,
-            resumeAggregation: null
-        }
+        getAegisDetails: fetchMonad(url, 'GET', null, null),
+        runBrowser: null,
+        register: null,
+        login: null,
+        getInstitutions: null,
+        startAggregation: null, // Provides phase polling, OTP, and ACA end callbacks
+        stopAggregation: null,
+        resumeAggregation: null
     };
 });
