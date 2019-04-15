@@ -41,7 +41,7 @@ const addBody = curry((body: string, obj: FetchOptions) =>
 );
 
 // @ts-ignore
-const callAjax = curry((url: string, method: string, token: string, body: any) =>
+const callFetch = curry((url: string, method: string, token: string, body: any) =>
     liftA3(
         sendRequest(url),
         addMethod(method),
@@ -58,5 +58,5 @@ module.exports = {
     addMethod,
     addAuthHeader,
     addBody,
-    callAjax
+    callFetch
 };

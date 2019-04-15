@@ -1,13 +1,7 @@
 // @ts-ignore
-const { compose, chain, curry } = require("ramda/es");
+const { curry } = require("ramda/es");
 // @ts-ignore
-const { callAjax } = require("../lib/hof/callAjax");
-// @ts-ignore
-const { fetchToTask } = require("../lib/hof/fetchToTask");
-// @ts-ignore
-const { taskToPromise } = require("../lib/fpcore/transforms");
-// @ts-ignore
-const { decorateClassInstance: decorate } = require("../lib/fpcore/pointfree");
+const { fetchMonad } = require("../lib/hof/fetchMonad");
 
 // @ts-ignore
 window.ew = window.ew || {};
@@ -15,11 +9,9 @@ window.ew = window.ew || {};
 const ew = window.ew;
 
 ew.init = curry((url, token) => {
-    const toPromise = task => () => taskToPromise(task);
-    const pipeline = compose(decorate('toPromise', toPromise), chain(fetchToTask), callAjax);
     return {
         public: {
-            getAegisDetails: pipeline(url, 'GET', null, null),
+            getAegisDetails: fetchMonad(url, 'GET', null, null),
             runBrowser: null
         },
         user: {
