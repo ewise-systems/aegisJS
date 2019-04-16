@@ -1,8 +1,10 @@
 // https://mostly-adequate.gitbooks.io/mostly-adequate-guide/appendix_b.html#maybe
-// @ts-ignore
+import { id } from "../fpcore/pointfree";
+
 class Maybe {
+  public $value: any;
+
   get isNothing() {
-      // @ts-ignore
     return this.$value === null || this.$value === undefined;
   }
 
@@ -10,53 +12,48 @@ class Maybe {
     return !this.isNothing;
   }
 
-  constructor(x) {
-      // @ts-ignore
+  constructor(x: any) {
     this.$value = x;
   }
 
   inspect() {
-      // @ts-ignore
-    return this.isNothing ? 'Nothing' : `Just(${inspect(this.$value)})`;
+    return this.isNothing ? 'Nothing' : `Just(${this.$value})`;
   }
 
   // ----- Pointed Maybe
-  static of(x) {
+  static of(x: any) {
     return new Maybe(x);
   }
 
   // ----- Functor Maybe
-  map(fn) {
-    // @ts-ignore
+  map(fn: any) { // TODO: Not really any
     return this.isNothing ? this : Maybe.of(fn(this.$value));
   }
 
   // ----- Applicative Maybe
-  ap(f) {
-    // @ts-ignore
+  ap(f: any) { // TODO: Not really any
     return this.isNothing ? this : f.map(this.$value);
   }
 
   // ----- Monad Maybe
-  chain(fn) {
+  chain(fn: any) { // TODO: Not really any
     return this.map(fn).fold();
   }
 
-  fold(x?) {
-    // @ts-ignore
+  fold(x?: any) { // TODO: Not really any
     return this.isNothing ? (x ? x : this) : this.$value;
   }
 
   // ----- Traversable Maybe
-  sequence(of) {
-    // @ts-ignore
-    this.traverse(of, identity);
+  sequence(of: any) { // TODO: Not really any
+    this.traverse(of, id);
   }
 
-  traverse(of, fn) {
-    // @ts-ignore
+  traverse(of: any, fn: any) { // TODO: Not really any
     return this.isNothing ? of(this) : fn(this.$value).map(Maybe.of);
   }
 }
 
-module.exports = Maybe;
+export {
+  Maybe
+}

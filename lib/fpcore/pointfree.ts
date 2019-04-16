@@ -1,5 +1,5 @@
 // @ts-ignore
-const { curry } = require("ramda/es");
+import { curry } from "ramda";
 
 // @ts-ignore
 const addProp = curry((obj, key, value) =>
@@ -37,7 +37,7 @@ const fold = curry((x, F) => F.fold(x));
 // @ts-ignore
 const toNull = _ => null;
 
-module.exports = {
+export {
     addProp,
     decorateClassInstance,
     either,
@@ -46,4 +46,4 @@ module.exports = {
     id,
     fold,
     toNull
-};
+}

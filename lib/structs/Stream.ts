@@ -1,10 +1,9 @@
-// @ts-ignore
-const { curry } = require("ramda/es");
+import { curry } from "ramda";
 
-// @ts-ignore
 class Stream {
-    constructor(pred, subscriber) {
-        // @ts-ignore
+    public subscribe: any;
+
+    constructor(pred: any, subscriber: any) { // TODO: Not really any
         this.subscribe = curry(subscriber)(pred);
     }
 }
@@ -56,4 +55,6 @@ class Stream {
     )
 */
 
-module.exports = Stream;
+export {
+    Stream
+}

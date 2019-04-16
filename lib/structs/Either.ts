@@ -1,23 +1,20 @@
 // https://mostly-adequate.gitbooks.io/mostly-adequate-guide/appendix_b.html#either
-// @ts-ignore
-const { inspect } = require('util');
-// @ts-ignore
-const { id } = require("../fpcore/pointfree");
+import { id } from "../fpcore/pointfree";
 
-class Either {
-  constructor(x) {
+export class Either {
+  constructor(x: any) {
     // @ts-ignore
     this.$value = x;
   }
 
   // ----- Pointed (Either a)
-  static of(x) {
+  static of(x: any) {
     return new Right(x);
   }
 }
 
 // @ts-ignore
-class Right extends Either {
+export class Right extends Either {
   get isLeft() {
     return false;
   }
@@ -26,28 +23,31 @@ class Right extends Either {
     return true;
   }
 
-  static of(x) {
+  static of(x: any) {
     throw new Error('`of` called on class Right (value) instead of Either (type)');
   }
 
   inspect() {
     // @ts-ignore
-    return `Right(${inspect(this.$value)})`;
+    return `Right(${this.$value})`;
   }
 
   // ----- Functor (Either a)
+  // @ts-ignore
   map(fn) {
     // @ts-ignore
     return Either.of(fn(this.$value));
   }
 
   // ----- Applicative (Either a)
+  // @ts-ignore
   ap(f) {
     // @ts-ignore
     return f.map(this.$value);
   }
 
   // ----- Monad (Either a)
+  // @ts-ignore
   chain(fn) {
     // @ts-ignore
     return fn(this.$value);
@@ -59,11 +59,13 @@ class Right extends Either {
   }
 
   // ----- Traversable (Either a)
+  // @ts-ignore
   sequence(of) {
     // @ts-ignore
     return this.traverse(of, id);
   }
 
+  // @ts-ignore
   traverse(of, fn) {
     // @ts-ignore
     fn(this.$value).map(Either.of);
@@ -71,7 +73,7 @@ class Right extends Either {
 }
 
 // @ts-ignore
-class Left extends Either {
+export class Left extends Either {
   get isLeft() {
     return true;
   }
@@ -80,13 +82,14 @@ class Left extends Either {
     return false;
   }
 
+  // @ts-ignore
   static of(x) {
     throw new Error('`of` called on class Left (value) instead of Either (type)');
   }
 
   inspect() {
     // @ts-ignore
-    return `Left(${inspect(this.$value)})`;
+    return `Left(${this.$value})`;
   }
 
   // ----- Functor (Either a)
@@ -109,17 +112,13 @@ class Left extends Either {
   }
 
   // ----- Traversable (Either a)
+  // @ts-ignore
   sequence(of) {
     return of(this);
   }
 
+  // @ts-ignore
   traverse(of, fn) {
     return of(this);
   }
 }
-
-module.exports = {
-  Either,
-  Left,
-  Right
-};

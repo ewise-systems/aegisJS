@@ -1,15 +1,14 @@
-// @ts-ignore
-const Task = require("../structs/Task");
+import { Task } from "../structs/Task";
 
+// TODO: x is a promise
 // promiseToTask :: Promise a b -> Task a b
-// @ts-ignore
-const promiseToTask = x => new Task((reject, resolve) => x.then(resolve).catch(reject));
+const promiseToTask = (x: any) => new Task((reject, resolve) => x.then(resolve).catch(reject));
 
+// TODO: x is a task
 // taskToPromise :: Task a b -> Promise a b
-// @ts-ignore
-const taskToPromise = x => new Promise((resolve, reject) => x.fork(reject, resolve));
+const taskToPromise = (x: any) => new Promise((resolve, reject) => x.fork(reject, resolve));
 
-module.exports = {
+export {
     promiseToTask,
     taskToPromise
-};
+}

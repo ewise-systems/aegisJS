@@ -24,12 +24,10 @@ const doOtaStart = () => {
     institutionsResult.subscribe(
         data => {
             if(data.status === "userInput") {
-                console.log('---> data', data);
                 const newPrompts = data.prompts.map(prmpt => ({
                     ...prmpt,
                     value: window.prompt(`Please enter ${prmpt.key}`)
                 }));
-                console.log('---> newPrompts', newPrompts);
                 return { ...data, prompts: newPrompts };
             }
             return data
@@ -39,5 +37,5 @@ const doOtaStart = () => {
     );
 
     // Promise Implementation
-    // institutionsResult.toPromise().then(successCallback('promise')).catch(errorCallback('promise'));
+    // N/A
 }

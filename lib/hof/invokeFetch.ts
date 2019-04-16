@@ -1,25 +1,19 @@
-// @ts-ignore
-const { compose, curry, chain } = require("ramda/es");
-// @ts-ignore
-const { callFetch } = require("./callFetch");
-// @ts-ignore
-const { taskToPromise } = require("../fpcore/transforms");
-// @ts-ignore
-const { decorateClassInstance: decorate } = require("../fpcore/pointfree");
+import { compose, curry } from "ramda";
+import { callFetch } from "./callFetch";
+import { taskToPromise } from "../fpcore/transforms";
+import { decorateClassInstance as decorate } from "../fpcore/pointfree";
 
-// @ts-ignore
-const toPromise = task => () => taskToPromise(task);
+// TODO: Not really any
+const toPromise = (task: any) => () => taskToPromise(task);
 
-// @ts-ignore
 const decoWithToPromise = decorate('toPromise', toPromise);
 
-// @ts-ignore
 const makeFetchMonad = compose(decoWithToPromise, callFetch);
 
 // @ts-ignore
 const invokeFetch = curry((method, token, body, url) => makeFetchMonad(url, method, token, body));
 
-module.exports = {
+export {
     toPromise,
     makeFetchMonad,
     decoWithToPromise,
