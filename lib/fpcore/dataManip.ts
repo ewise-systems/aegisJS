@@ -15,9 +15,9 @@ const base64ToBuffer = x => Buffer.from(x, 'base64');
 // @ts-ignore
 const parseJSON = x => {
     try {
-        return Right(JSON.parse(x));
+        return new Right(JSON.parse(x));
     } catch(e) {
-        return Left(e);
+        return new Left(e);
     }
 };
 

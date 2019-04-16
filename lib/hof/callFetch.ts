@@ -25,9 +25,12 @@ interface FetchOptions {
 const sendRequest = curry((url, method, token, body) =>
     new Task((reject, result) =>
         fetch(url, {...method, headers: {...token}, ...body})
-        .then(async x => {
-            const data = await x.json();
-            return x.status === 200 ? result(data) : reject(data)
+        .then(async response => {
+            console.log('inputs', {...method, headers: {...token}, ...body});
+            console.log('response', response);
+            const data = await response.json();
+            console.log('data', data);
+            return response.status === 200 ? result(data) : reject(data);
         })
         .catch(reject)
     )
@@ -38,7 +41,7 @@ const addMethod = curry((method: string, obj: FetchOptions) =>
 );
 
 const addAuthHeader = curry((token: string, obj: FetchOptions) =>
-    Maybe.of(token).map(concat('Bearer ')).map(addProp(obj, 'Authorization')).fold({})
+    Maybe.of(token).map(concat('Bearer ')).map(addProp(obj, 'Authorization')).map(x => ({ ...x, "Content-Type": "application/json" })).fold({})
 );
 
 const addBody = curry((body: string, obj: FetchOptions) =>

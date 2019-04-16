@@ -16,8 +16,8 @@ app.get('/', async (req, res) => {
     res.sendFile(lib);
 })
 
-app.get('/ew.js', async (req, res) => {
-    const lib = path.resolve(__dirname, '../dist/eww.js');
+app.get('/aegis.js', async (req, res) => {
+    const lib = path.resolve(__dirname, '../dist/aegis.js');
     res.sendFile(lib);
 })
 

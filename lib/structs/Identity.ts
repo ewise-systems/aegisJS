@@ -7,7 +7,7 @@ const { id } = require("../fpcore/pointfree");
 // @ts-ignore
 class Identity {
   constructor(x) {
-      // @ts-ignore
+    // @ts-ignore
     this.$value = x;
   }
 

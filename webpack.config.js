@@ -1,10 +1,10 @@
-const path = require('path');
+const path = require("path");
 
 module.exports = {
   mode: "development",
-  entry: './build/src/eww.js',
+  entry: "./build/src/aegis.js",
   output: {
-    filename: 'eww.js',
-    path: path.resolve(__dirname, 'dist')
+    filename: "aegis.js",
+    path: path.resolve(__dirname, "dist")
   }
 };

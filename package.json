@@ -2,12 +2,12 @@
   "name": "eww",
   "version": "0.0.1",
   "description": "Open source library for interacting with eWise Systems' Aegis 2.0 architecture",
-  "main": "src/eww.js",
+  "main": "src/aegis.js",
   "scripts": {
     "clean": "rm -rf build",
     "prebuid": "npm run clean",
     "build": "npm run build:tsc && webpack --config webpack.config.js",
-    "build:tsc": "tsc --target ES5 --outDir build src/*.ts lib/**/*.ts",
+    "build:tsc": "tsc --target ESNext --outDir build src/*.ts lib/**/*.ts",
     "start": "tsc srv/app.ts && npm run build && node srv/app.js",
     "test": "mocha"
   },
@@ -30,10 +30,11 @@
     "@types/ramda": "^0.26.6",
     "lodash": "^4.17.11",
     "ramda": "^0.26.1",
+    "uniqid": "^5.0.3",
     "whatwg-fetch": "^3.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:ewise-systems/eww.git"
+    "url": "git@github.com:ewise-systems/aegisJS.git"
   }
 }
