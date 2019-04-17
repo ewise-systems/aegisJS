@@ -1,18 +1,18 @@
 // Source
 // https://codeburst.io/alternative-to-javascripts-switch-statement-with-a-functional-twist-3f572787ba1c
-// @ts-ignore
-const matchedCase = x => ({
+const matchedCase = (x: any) => ({
     on: () => matchedCase(x),
     otherwise: () => x
 });
 
-// @ts-ignore
-const matchCase = x => ({  
+const matchCase = (x: any) => ({  
+    // @ts-ignore
     on: (pred, fn) => pred(x) ? matchedCase(fn(x)) : matchCase(x),
+    // @ts-ignore
     otherwise: fn => fn(x)
 });
 
-module.exports = {
+export {
     matchedCase,
     matchCase
-};
+}

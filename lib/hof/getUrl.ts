@@ -1,15 +1,9 @@
-// @ts-ignore
-const { isString, replace } = require("lodash/fp");
-// @ts-ignore
-const { compose, curry, chain, pipe, map, test } = require("ramda/es");
-// @ts-ignore
-const { matchCase } = require("../fpcore/matchCase");
-// @ts-ignore
-const { on, otherwise, id } = require("../fpcore/pointfree");
-// @ts-ignore
-const { getUrlFromJWT } = require("../fpcore/dataManip");
-// @ts-ignore
-const Maybe = require("../structs/Maybe");
+import { compose, curry, chain, pipe, map, replace, test } from "ramda";
+import { matchCase } from "../fpcore/matchCase";
+import { on, otherwise, id } from "../fpcore/pointfree";
+import { getUrlFromJWT, isString } from "../fpcore/dataManip";
+import { Maybe } from "../structs/Maybe";
+// const { isString } = require("lodash/fp");
 
 const isEwiseUrl = test(/^https:\/\/pdv\.ewise\.com:\d{0,}\/?/);
 
@@ -21,14 +15,13 @@ const isUrlOrJwt =
         Maybe.of
     );
 
-const doIfString = x => isString(x) ? Maybe.of(x) : Maybe.of(null);
+const doIfString = (x: string) => isString(x) ? Maybe.of(x) : Maybe.of(null);
 
 const removeTrailingSlash = replace(/(\/)*$/g, '');
 
 const removeLeadingAndTrailingSlash = replace(/((^(\/)*)|((\/)*$))/g, '');
 
 // TODO: Improve this
-// @ts-ignore
 const makeUrl = curry((path, base) => {
     try {
         return removeTrailingSlash(base.trim()) + '/' + removeLeadingAndTrailingSlash(path.trim());
@@ -38,9 +31,9 @@ const makeUrl = curry((path, base) => {
 });
 
 // @ts-ignore
-const getUrl = path => compose(map(makeUrl(path)), chain(isUrlOrJwt), doIfString);
+const getUrl = (path: string) => compose(map(makeUrl(path)), chain(isUrlOrJwt), doIfString);
 
-module.exports = {
+export {
     isEwiseUrl,
     getUrlFromJWT,
     isUrlOrJwt,

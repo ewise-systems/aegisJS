@@ -1,8 +1,11 @@
 build/*
-dist/*
 node_modules/*
 artifact/*
+dist/*
 srv/app.js
+
+# .xml files
+*.xml
 
 # Logs
 logs

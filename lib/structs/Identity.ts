@@ -1,58 +1,51 @@
 // https://mostly-adequate.gitbooks.io/mostly-adequate-guide/appendix_b.html#identity
-// @ts-ignore
-const { inspect } = require('util');
-// @ts-ignore
-const { id } = require("../fpcore/pointfree");
+import { id } from "../fpcore/pointfree";
 
-// @ts-ignore
 class Identity {
-  constructor(x) {
-      // @ts-ignore
+  public $value: any;
+
+  constructor(x: any) {
     this.$value = x;
   }
 
   inspect() {
-    // @ts-ignore
-    return `Identity(${inspect(this.$value)})`;
+    return `Identity(${this.$value})`;
   }
 
   // ----- Pointed Identity
-  static of(x) {
+  static of(x: any) {
     return new Identity(x);
   }
 
   // ----- Functor Identity
-  map(fn) {
-    // @ts-ignore
-    return /*console.log(fn) || */Identity.of(fn(this.$value));
+  map(fn: any) { // TODO: Not really any
+    return Identity.of(fn(this.$value));
   }
 
   // ----- Applicative Identity
-  ap(f) {
-    // @ts-ignore
+  ap(f: any) { // TODO: Not really any
     return f.map(this.$value);
   }
 
   // ----- Monad Identity
-  chain(fn) {
+  chain(fn: any) { // TODO: Not really any
     return this.map(fn).fold();
   }
 
   fold() {
-    // @ts-ignore
     return this.$value;
   }
 
   // ----- Traversable Identity
-  sequence(of) {
-    // @ts-ignore
+  sequence(of: any) { // TODO: Not really any
     return this.traverse(of, id);
   }
 
-  traverse(of, fn) {
-    // @ts-ignore
+  traverse(of: any, fn: any) { // TODO: Not really any
     return fn(this.$value).map(Identity.of);
   }
 }
 
-module.exports = Identity;
+export {
+  Identity
+}
