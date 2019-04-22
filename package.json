@@ -7,8 +7,8 @@
     "clean": "rm -rf build",
     "prebuid": "npm run clean",
     "build": "webpack --config webpack.config.js",
-    "start": "npm run build && node srv/app.js",
-    "test": "nyc --reporter text mocha --require source-map-support/register --require ts-node/register --recursive test/**/*.spec.ts",
+    "start": "npm run build && node srv/testApp.js",
+    "test": "nyc --reporter text mocha --require source-map-support/register --recursive test/**/*.spec.js",
     "artifice": "nyc report && npm test -- --reporter=xunit --reporter-options output=mocha_test_results.xml"
   },
   "keywords": [
@@ -36,10 +36,14 @@
   "dependencies": {
     "@types/lodash": "^4.14.123",
     "@types/ramda": "^0.26.6",
+    "ajv": "^6.10.0",
+    "axios": "^0.18.0",
+    "folktale": "^2.3.2",
     "lodash": "^4.17.11",
     "ramda": "^0.26.1",
     "typescript": "^3.4.3",
     "uniqid": "^5.0.3",
+    "valid-url": "^1.0.9",
     "whatwg-fetch": "^3.0.0"
   },
   "repository": {
@@ -48,12 +52,11 @@
   },
   "nyc": {
     "extension": [
-      ".ts",
-      ".tsx"
+      ".js"
     ],
     "include": [
-      "**/lib/**/*.ts",
-      "**/src/*.ts"
+      "**/lib/**/*.js",
+      "**/src/*.js"
     ],
     "reporter": [
       "html"

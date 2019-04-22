@@ -8,8 +8,15 @@ const doOtaGetInstitutions = () => {
     const institutionsResult = ota.getInstitutions(instCode);
 
     // Monadic Implementation
-    institutionsResult.fork(errorCallback('monad'), successCallback('monad'));
+    institutionsResult.run().listen({
+        onRejected: errorCallback('monad'),
+        onResolved: successCallback('monad')
+    });
 
     // Promise Implementation
-    institutionsResult.toPromise().then(successCallback('promise')).catch(errorCallback('promise'));
+    institutionsResult
+    .run()
+    .promise()
+    .then(successCallback('promise'))
+    .catch(errorCallback('promise'));
 }

@@ -1,8 +1,7 @@
-build/*
 node_modules/*
 artifact/*
 dist/*
-srv/app.js
+.DS_Store
 
 # .xml files
 *.xml

@@ -6,8 +6,15 @@ const doRunBrowser = () => {
     const browser = aegis.runBrowser(input);
 
     // Monadic Implementation
-    browser.fork(errorCallback('monad'), successCallback('monad'));
+    browser.run().listen({
+        onRejected: errorCallback('monad'),
+        onResolved: successCallback('monad')
+    });
 
     // Promise Implementation
-    browser.toPromise().then(successCallback('promise')).catch(errorCallback('promise'));
+    browser
+    .run()
+    .promise()
+    .then(successCallback('promise'))
+    .catch(errorCallback('promise'));
 }
