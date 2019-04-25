@@ -44,8 +44,20 @@ const doOtaRunAggregation = () => {
                             value: el.value
                         }
                     }
+                )
+                .concat(
+                    Array.prototype.map.call(
+                        document.querySelectorAll("select"),
+                        el => {
+                            return {
+                                key: el.id,
+                                value: el.value
+                            }
+                        }
+                    )
                 );
                 otaControls.resume({prompts}).run();
+                otpBox.parentNode.removeChild(otpBox);
             });
 
             otpBox.appendChild(submit);
@@ -54,7 +66,7 @@ const doOtaRunAggregation = () => {
             );
 
             Array.prototype.map.call(data.prompts, prompt => {
-                let { label, input, image } = ((type, label, b64) => {
+                let { label, input, image } = ((type, label, b64, opts) => {
                     let l, i, h;
                     switch(type) {
                         case "input":
@@ -79,17 +91,31 @@ const doOtaRunAggregation = () => {
 
                             i = document.createElement("input");
                         break;
+                        case "lov":
+                            i = document.createElement("select");
+                            i.innerText = label;
+
+                            Array.prototype.map.call(opts, opt => {
+                                let choice = document.createElement("option");
+                                choice.value = opt.key;
+                                choice.innerText = opt.label;
+
+                                i.appendChild(choice);
+                            });
+                        break;
                     }
                     return { label: l, input: i, image: h };
-                })(prompt.type, prompt.label, prompt.base64Image);
+                })(prompt.type, prompt.label, prompt.base64Image, prompt.options);
 
                 input.id = prompt.key;
-                label.for = prompt.key;
 
-                otpBox.appendChild(label);
-                otpBox.appendChild(
-                    document.createElement("br")
-                );
+                if(label) {
+                    label.for = prompt.key;
+                    otpBox.appendChild(label);
+                    otpBox.appendChild(
+                        document.createElement("br")
+                    );
+                }
 
                 if(image) {
                     otpBox.appendChild(image);
