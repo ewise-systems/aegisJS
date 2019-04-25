@@ -1,60 +1,51 @@
-// const uniqid = require("uniqid");
-// const { curry } = require("ramda");
-// const { Task } = require("../lib/structs/Task");
-// const { Stream } = require("../lib/structs/Stream");
-const { requestToAegis } = require("../lib/hof/requestToAegis");
+const uniqid = require("uniqid");
+const root = require("window-or-global");
+const { BehaviorSubject } = require("rxjs");
+const { requestToAegis, requestToAegisWithToken } = require("../lib/hof/requestToAegis");
+const { scrapeFromPDV } = require("../lib/hos/scrapeFromPDV");
 
-// const someHOF = curry((jwt, csrf, body) => {
-//     return new Stream(
-//         (phase: string) => phase === "DONE",
-//         (pred: any, next: any, error: any, done: any) => {
-//             const init = requestToAegis("POST", jwt, body, "/ota/process")(jwt);
-//             const timer = (fetchMonad: any) => setTimeout(() => {
-//                 const newFetchMonad = fetchMonad
-//                 .chain((data: any) => {
-//                     const { processId: pid, status, phase } = data;
-//                     if(pred(phase)) {
-//                         done(data);
-//                         return Task.of(null);
-//                     } else if(status === "userInput") {
-//                         const otpChain = next(data);
-//                         const newBody = { ...otpChain, challenge: csrf };
-//                         return requestToAegis("POST", jwt, newBody, `/ota/process/${pid}`)(jwt)
-//                     } else {
-//                         next(data);
-//                         return requestToAegis("GET", jwt, null, `/ota/process/${pid}?challenge=${csrf}`)(jwt);
-//                     }
-//                 })
-//                 newFetchMonad.fork(error, (data: any) => {
-//                     data === null ? null : timer(new Task((_, result) => result(data)));
-//                 })
-//             }, 500);
-//             timer(init);
-//         }
-//     );
-// })
-
-// @ts-ignore
 const aegis = {
-    getDetails: requestToAegis('GET', null, null, '/'),
-    runBrowser: requestToAegis('GET', null, null, '/public/browser'),
+    getDetails: requestToAegis("GET", null, null, "/"),
+    runBrowser: requestToAegis("GET", null, null, "/public/browser"),
     register: null,
     login: null,
-    ota: jwt => ({
-        getInstitutions: (instCode = '') =>
-            requestToAegis('GET', jwt, null, `/ota/institutions/${instCode}`)(jwt),
+    initializeOta: jwt => ({
+        getInstitutions: (instCode = "") =>
+            requestToAegisWithToken({
+                method: "GET",
+                jwt,
+                body: null,
+                path: `/ota/institutions/${instCode}`,
+                tokenOrUrl: jwt
+            }),
         start: body => {
-            // const csrf = uniqid.time();
-            // return someHOF(jwt, csrf, {...body, challenge: csrf});
+            const csrf = uniqid();
+            const stream$ = new BehaviorSubject({});
+            const bodyCsrf = { ...body, challenge: csrf };
+            scrapeFromPDV(jwt, csrf, bodyCsrf).subscribe(stream$);
+            return {
+                stream$,
+                resume: otp =>
+                    requestToAegisWithToken({
+                        method: "POST",
+                        jwt,
+                        body: { ...otp, challenge: csrf },
+                        path: `/ota/process/${stream$.value.processId}`,
+                        tokenOrUrl: jwt
+                    }),
+                stop: () =>
+                    requestToAegisWithToken({
+                        method: "DELETE",
+                        jwt,
+                        body: null,
+                        path: `ota/process/${stream$.value.processId}?challenge=${csrf}`, 
+                        tokenOrUrl: jwt
+                    })
+            }
         },
-        stop: null,
-        resume: null
     })
 };
 
-window.aegis = window.aegis || {};
-window.aegis = { ...window.ew, ...aegis };
-
-module.exports = {
-    aegis
-}
+// Make aegis globally available
+root.aegis = root.aegis || {};
+root.aegis = { ...root.aegis, ...aegis };

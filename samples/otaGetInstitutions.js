@@ -4,7 +4,7 @@ const doOtaGetInstitutions = () => {
 
     const errorCallback = msg => error => console.log(`Error Encountered from ${msg}:`, error);
     const successCallback = msg => data => console.log(`Data Received from ${msg}:`, data);
-    const ota = aegis.ota(input);
+    const ota = aegis.initializeOta(input);
     const institutionsResult = ota.getInstitutions(instCode);
 
     // Monadic Implementation
