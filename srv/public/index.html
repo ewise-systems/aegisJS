@@ -1,7 +1,8 @@
 <html>
     <head></head>
     <body>
-        <button id="clear">Clear</button>
+        <button id="clear">Clear</button> <button id="start">Start</button> <button id="stop">Stop</button>
+        <br/>
         <div id="viewPort"></div>
 
         <script type="text/javascript" src="/aegis.js"></script>
@@ -9,11 +10,25 @@
         <script type="text/javascript" src="/samples/runBrowser.js"></script>
         <script type="text/javascript" src="/samples/otaGetInstitutions.js"></script>
         <script type="text/javascript" src="/samples/otaRunAggregation.js"></script>
+        <script type="text/javascript" src="/samples/chooseInstitutionAndAggregate.js"></script>
+        <script type="text/javascript" src="/samples/doOtaRunAggregationClosure.js"></script>
         <script>
             document
                 .querySelector("#clear")
                 .addEventListener("click", () =>
                     document.querySelector("#viewPort").innerHTML = ""
+                );
+            
+            document
+                .querySelector("#start")
+                .addEventListener("click", () =>
+                    chooseInstitutionAndAggregate()
+                );
+
+            document
+                .querySelector("#stop")
+                .addEventListener("click", () =>
+                    stopOta && stopOta().run()
                 );
         </script>
     </body>
