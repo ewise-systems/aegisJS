@@ -1,10 +1,20 @@
 <html>
-    <head>
+    <head></head>
+    <body>
+        <button id="clear">Clear</button>
+        <div id="viewPort"></div>
+
         <script type="text/javascript" src="/aegis.js"></script>
         <script type="text/javascript" src="/samples/getDetails.js"></script>
         <script type="text/javascript" src="/samples/runBrowser.js"></script>
         <script type="text/javascript" src="/samples/otaGetInstitutions.js"></script>
-        <script type="text/javascript" src="/samples/otaStart.js"></script>
-    </head>
-    <body></body>
+        <script type="text/javascript" src="/samples/otaRunAggregation.js"></script>
+        <script>
+            document
+                .querySelector("#clear")
+                .addEventListener("click", () =>
+                    document.querySelector("#viewPort").innerHTML = ""
+                );
+        </script>
+    </body>
 </html>

@@ -6,8 +6,15 @@ const doGetDetails = () => {
     const details = aegis.getDetails(input);
 
     // Monadic Implementation
-    details.fork(errorCallback('monad'), successCallback('monad'));
+    details.run().listen({
+        onRejected: errorCallback('monad'),
+        onResolved: successCallback('monad')
+    });
 
     // Promise Implementation
-    details.toPromise().then(successCallback('promise')).catch(errorCallback('promise'));
+    details
+    .run()
+    .promise()
+    .then(successCallback('promise'))
+    .catch(errorCallback('promise'));
 }
