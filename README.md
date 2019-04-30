@@ -162,7 +162,7 @@ An object that contains a stream and methods to control it. The stream automatic
 * `type` <String> A string that describes the type of action being performed. Can be `aggregate`.
 
 ## Contributing and Community Guidelines
-Please see our [contributing guide](https://github.com/ewise-systems/aegisJS/blob/develop/CONTRIBUTING) and our [code of conduct](https://github.com/ewise-systems/aegisJS/blob/develop/CODE_OF_CONDUCT).
+Please see our [contributing guide](https://github.com/ewise-systems/aegisJS/blob/develop/CONTRIBUTING.md) and our [code of conduct](https://github.com/ewise-systems/aegisJS/blob/develop/CODE_OF_CONDUCT.md) for guides on how to contribute to this project.
 
 ## License
 [MIT](https://github.com/ewise-systems/aegisJS/blob/develop/LICENSE)
