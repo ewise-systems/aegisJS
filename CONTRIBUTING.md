@@ -17,6 +17,13 @@ We're the most in need of the following contributions:
 
 If you have a feature you would like to see added in or if you find a bug, please raise an issue first.
 
+## Writing Unit Tests
+1. No unit test is too trivial to write a test for
+2. Make one and only one assertion per `it` statement
+3. Mimic the sentence-like construction of the existing tests, and make them descriptive.
+  * "it should not throw" or "describe splitArray" are good
+  * "it array containing values 1 and 2 should be equal to 3" or "describe test suite splitArray" are bad
+
 ## Development Guide
 
 ##### Running locally

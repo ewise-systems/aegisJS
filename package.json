@@ -4,14 +4,16 @@
   "description": "Open source library for interacting with eWise Systems' Aegis 2.0 architecture",
   "main": "src/aegis.js",
   "scripts": {
-    "prepublish": "npm run lint && npm run test",
-    "clean": "rm -rf build",
-    "prebuid": "npm run clean",
-    "build": "webpack --config webpack.config.js",
-    "start": "npm run lint && npm run test && npm run build && node srv/testApp.js",
-    "test": "nyc --reporter text mocha --require source-map-support/register --recursive test/**/*.spec.js",
-    "lint": "jshint src lib test",
-    "artifice": "nyc report && npm test -- --reporter=xunit --reporter-options output=mocha_test_results.xml"
+    "prepublish": "npm run build",
+    "clean": "rm -rf dist",
+    "lint": "jshint .",
+    "test": "nyc --reporter text mocha --recursive test/**/*.spec.js",
+    "lint-test": "npm run lint && npm run test",
+    "prebuild": "npm run clean",
+    "build": "npm run lint-test && webpack --config webpack.config.js",
+    "start": "npm run build && node srv/testApp.js",
+    "preartifice": "rm -rf .nyc_output coverage mocha_test_results.xml",
+    "artifice": "npm run lint-test -- -- --reporter=xunit --reporter-options output=mocha_test_results.xml && nyc report"
   },
   "keywords": [
     "ewise",
@@ -26,6 +28,7 @@
     "covgen": "^3.1.0",
     "express": "^4.16.4",
     "jshint": "^2.10.2",
+    "lodash": "^4.17.11",
     "mocha": "^6.1.4",
     "nyc": "^14.0.0",
     "source-map-support": "^0.5.12",
