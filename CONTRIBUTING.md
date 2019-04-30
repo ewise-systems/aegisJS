@@ -6,7 +6,7 @@ First of all, thank you for wanting to contribute to this project. This library 
 
 When contributing to this repository, please make an issue to discuss any bugs or other aspects of the code you wish to change. However, if you discover a security vulnerability, please do NOT make an issue about it. Email the team instead at the email addresses at the bottom of this document.
 
-Please note we have a [code of conduct](https://github.com/ewise-systems/aegisJS/blob/develop/CODE_OF_CONDUCT). Please follow it in all your interactions with the project.
+Please note we have a [code of conduct](https://github.com/ewise-systems/aegisJS/blob/develop/CODE_OF_CONDUCT.md). Please follow it in all your interactions with the project.
 
 ## What Contributions Are We Looking For?
 We're the most in need of the following contributions:
