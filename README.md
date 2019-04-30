@@ -82,25 +82,25 @@ This function wraps the `aegis` object and controls how it is instantiated.
 
 The function is called with either a URL or a JWT because a JWT is not required to learn the running PDV's version as long as you know the URL to that PDV instance.
 
-* `accessPoint` <String> A URL to connect to a local or remote running PDV instance, or a valid eWise-issued JWT that contains this URL.
+* `accessPoint` \<String> A URL to connect to a local or remote running PDV instance, or a valid eWise-issued JWT that contains this URL.
 * Returns: `Task(Error, AegisDetailsObjectResult)`
 
 ##### AegisDetailsObjectResult
-* `aegis` <String> The version of the aegis instance.
-* `engine` <String> The version of the engine instance.
+* `aegis` \<String> The version of the aegis instance.
+* `engine` \<String> The version of the engine instance.
 
 ### runBrowser(accessPoint)
 
 Calling this function does not do anything, but it is useful to test that the JxBrowser installation is successful. This will open a JxBrowser instance in the local device.
 
-* `accessPoint` <String> A URL to connect to a local or remote running PDV instance, or a valid eWise-issued JWT that contains this URL.
+* `accessPoint` \<String> A URL to connect to a local or remote running PDV instance, or a valid eWise-issued JWT that contains this URL.
 * Returns: `Task(Error, EmptyObject)`
 
 ### initializeOta
 
 Returns an object that can get valid institutions for data aggregation and their prompts, as well as provide means to start, stop and resume the aggregation.
 
-* `jwt` <String> A valid eWise-issued JWT.
+* `jwt` \<String> A valid eWise-issued JWT.
 * Returns: `InitializeOtaObjectResult`
 
 ## InitializeOtaObjectResult
@@ -109,57 +109,57 @@ Returns an object that can get valid institutions for data aggregation and their
 
 The institutions returned here are those that were made available to the client and can be aggregated with the proper credentials.
 
-* `instCode` <String> An institution code that is registered in the eWise PDV.
+* `instCode` \<String> An institution code that is registered in the eWise PDV.
 * Returns: `Task(Error, GroupInstitutionsObject | OneInstitutionObject)`
 
 ##### GroupInstitutionsObject
-* `content` Array<InstitutionGroup>
+* `content` Array\<InstitutionGroup>
 
 ##### InstitutionGroup
-* `name` <String> The name of the institution group.
-* `description` <String> A description of the institution group.
-* `institutions` Array<Institution> A list of valid instutitions.
+* `name` \<String> The name of the institution group.
+* `description` \<String> A description of the institution group.
+* `institutions` Array\<Institution> A list of valid instutitions.
 
 ##### Institution
-* `code` <Number> A digit that represents a valid institution that can be aggregated.
-* `name` <String> The name of the institution.
+* `code` \<Number> A digit that represents a valid institution that can be aggregated.
+* `name` \<String> The name of the institution.
 
 ##### OneInstitutionObject
-* `code` <Number> A digit that represents a valid institution that can be aggregated.
-* `name` <String> The name of the institution.
-* `prompts` Array<InstitutionPrompt> A list of prompts required by the institution.
+* `code` \<Number> A digit that represents a valid institution that can be aggregated.
+* `name` \<String> The name of the institution.
+* `prompts` Array\<InstitutionPrompt> A list of prompts required by the institution.
 
 ##### InstitutionPrompt
-* `editable` <Boolean> Describes if the prompt's value can be changed.
-* `index` <Integer> Positional descriptor of the prompt in an array.
-* `key` <String> The `key` value which must be returned to the PDV upon supplying the prompt's value.
-* `label` <String> The text that should be displayed to the user upon requesting for the prompt.
-* `primary` <Boolean> Whether the prompt is the main one or not.
-* `required` <Boolean> Whether the prompt is required or not.
-* `value` <Boolean> A default value that must be updated with a user-supplied input if the prompt is editable.
-* `type` <Boolean> Can be `lov` (list of values), `input` (string), `image` (base64 image data string), and `password` (sensitive string).
+* `editable` \<Boolean> Describes if the prompt's value can be changed.
+* `index` \<Integer> Positional descriptor of the prompt in an array.
+* `key` \<String> The `key` value which must be returned to the PDV upon supplying the prompt's value.
+* `label` \<String> The text that should be displayed to the user upon requesting for the prompt.
+* `primary` \<Boolean> Whether the prompt is the main one or not.
+* `required` \<Boolean> Whether the prompt is required or not.
+* `value` \<Boolean> A default value that must be updated with a user-supplied input if the prompt is editable.
+* `type` \<Boolean> Can be `lov` (list of values), `input` (string), `image` (base64 image data string), and `password` (sensitive string).
 
 ### start(instCode, prompts)
 
 Upon calling this function, the aggregation will immediately run whether or not a subscriber has been attached to the stream. There is no `.run` method in this implementation.
 
-* `instCode` <String> An institution code that is registered in the eWise PDV.
-* `prompts` Array<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
+* `instCode` \<String> An institution code that is registered in the eWise PDV.
+* `prompts` Array\<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
 * Returns: `OTAControlObject`
 
 ##### OTAControlObject
 
 An object that contains a stream and methods to control it. The stream automatically pauses when it receives an object with a `status` equal to `userInput` from the PDV server.
 
-* `stream$` <Stream> A monadic event stream which can be mapped, switched, flattened, etc. Each event is a `PDVPollingObject`. Subscribing to this stream will grant you access to its data.
-* `resume` <Function> Resumes the aggregation if it is paused, allowing the stream to continue. Takes an array of Prompts as input.
-* `stop` <Function> Terminates the aggregation, which will eventually terminate the stream.
+* `stream$` \<Stream> A monadic event stream which can be mapped, switched, flattened, etc. Each event is a `PDVPollingObject`. Subscribing to this stream will grant you access to its data.
+* `resume` \<Function> Resumes the aggregation if it is paused, allowing the stream to continue. Takes an array of Prompts as input.
+* `stop` \<Function> Terminates the aggregation, which will eventually terminate the stream.
 
 ##### PDVPollingObject
-* `processId` <String> A string that uniquely identifies a currently running process.
-* `profileId` <String> A string that uniquely identifies a user's account for a certain institution.
-* `status` <String> Describes the status of the currently running process. It can be `running`, `error`, `userInput`, `stopped`, `partial`, or `done`
-* `type` <String> A string that describes the type of action being performed. Can be `aggregate`.
+* `processId` \<String> A string that uniquely identifies a currently running process.
+* `profileId` \<String> A string that uniquely identifies a user's account for a certain institution.
+* `status` \<String> Describes the status of the currently running process. It can be `running`, `error`, `userInput`, `stopped`, `partial`, or `done`
+* `type` \<String> A string that describes the type of action being performed. Can be `aggregate`.
 
 ## Contributing and Community Guidelines
 Please see our [contributing guide](https://github.com/ewise-systems/aegisJS/blob/develop/CONTRIBUTING.md) and our [code of conduct](https://github.com/ewise-systems/aegisJS/blob/develop/CODE_OF_CONDUCT.md) for guides on how to contribute to this project.
