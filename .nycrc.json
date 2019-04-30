@@ -1,0 +1,13 @@
+{
+  "extension": [
+    ".js"
+  ],
+  "include": [
+    "**/lib/**/*.js",
+    "**/src/*.js"
+  ],
+  "reporter": [
+    "html"
+  ],
+  "all": true
+}

@@ -39,10 +39,10 @@ const aegis = {
                         path: `ota/process/${stream$.value.processId}?challenge=${csrf}`, 
                         tokenOrUrl: jwt
                     })
-            }
+            };
         }),
     })
 };
 
 module.exports = () =>
-    Object.freeze(aegis)
+    Object.freeze(aegis);

@@ -1,18 +1,15 @@
+/*jshint expr: true*/
+
 require("mocha");
 require("chai/register-should");
 const { expect } = require("chai");
-const {
-    safeSplit,
-    safeNth,
-    safeBase64ToBuffer,
-    safeJsonParse,
-    safeIsWebUri,
-    safeMakeWebUrl,
-    unsafeValidateAegisJwtSchema,
-    safeGetAegisUrl
-} = require("../lib/fpcore/safeOps");
+const { safeBase64ToBuffer } = require("../lib/fpcore/safeOps");
 
 describe("safeBase64ToBuffer", () => {
+    it("should create Maybe from 'string'", () => {
+        safeBase64ToBuffer("string").getOrElse(null).should.be.an.instanceof(Buffer);
+    });
+
     it("should create Maybe from 'string'", () => {
         safeBase64ToBuffer("string").getOrElse(null).should.be.an.instanceof(Buffer);
     });
