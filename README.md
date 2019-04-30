@@ -70,12 +70,9 @@ details
 
 ## ewise_aegisJS
 
-### ewise_aegisJS(options)
+### ewise_aegisJS()
 
 This function wraps the `aegis` object and controls how it is instantiated.
-
-* `options` <Object>
-  * `global` <Boolean> instantiate the `aegis` object and inject it to the global scope. Default `false`.
 
 * Returns: `AegisObject`
 
