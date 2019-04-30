@@ -29,10 +29,11 @@ If you have a feature you would like to see added in or if you find a bug, pleas
 Use `npm run build -- --mode=production`
 
 ##### Before a Pull Request
-1. Ensure all the tests pass with `npm test`
-2. Ensure the project remains at 100% code coverage from `npm test`
-3. Ensure you are changing only code related to that one feature or bug
+1. Ensure it lints
+2. Ensure all the tests pass with `npm test`
+3. Ensure the project remains at 100% code coverage from `npm test`
 4. Ensure the project can bundle with `npm run build`
+5. Ensure you are changing only code related to one feature or bug
 
 ##### Pull Request Process
 1. Ensure any install or build dependencies are removed before the end of the layer when doing a build.
