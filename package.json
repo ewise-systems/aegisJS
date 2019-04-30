@@ -28,6 +28,7 @@
     "covgen": "^3.1.0",
     "express": "^4.16.4",
     "jshint": "^2.10.2",
+    "lodash": "^4.17.11",
     "mocha": "^6.1.4",
     "nyc": "^14.0.0",
     "source-map-support": "^0.5.12",
