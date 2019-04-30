@@ -6,7 +6,8 @@ module.exports = {
   devtool: "source-map",
   output: {
     filename: "aegis.js",
-    path: path.resolve(__dirname, "dist")
+    path: path.resolve(__dirname, "dist"),
+    library: "ewise_aegisJS",
   },
   resolve: {
     extensions: [".js", ".json"]

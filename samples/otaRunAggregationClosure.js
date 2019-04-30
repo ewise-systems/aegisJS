@@ -1,7 +1,6 @@
-const doOtaRunAggregationClosure = (jwt, prompts) => {
-
+const doOtaRunAggregationClosure = (jwt, instCode, prompts) => {
     const ota = aegis.initializeOta(jwt);
-    const otaControls = ota.start(prompts);
+    const otaControls = ota.start(instCode, prompts);
 
     // Make controls available to the console
     // Practice for dev/test only - don't do this in production

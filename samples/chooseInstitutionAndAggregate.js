@@ -81,9 +81,10 @@ const renderPromptsToScreen = (jwt, prompts) => {
     let btn = document.createElement("button");
     btn.innerText = "Submit";
     btn.addEventListener("click", async () => {
-        doOtaRunAggregationClosure(jwt, {
-            code: prompts.code,
-            prompts: Array.prototype.map.call(
+        doOtaRunAggregationClosure(
+            jwt,
+            prompts.code,
+            Array.prototype.map.call(
                 document.querySelectorAll("input.credentials"),
                 inpt => {
                     return {
@@ -92,7 +93,7 @@ const renderPromptsToScreen = (jwt, prompts) => {
                     }
                 }
             )
-        });
+        );
 
         document.getElementById("viewPort").innerHTML = "";
     });

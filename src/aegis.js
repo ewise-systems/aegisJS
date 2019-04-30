@@ -1,14 +1,13 @@
 const uniqid = require("uniqid");
 const root = require("window-or-global");
+const { curry } = require("ramda");
 const { BehaviorSubject } = require("rxjs");
 const { requestToAegis, requestToAegisWithToken } = require("../lib/hof/requestToAegis");
-const { scrapeFromPDV } = require("../lib/hos/scrapeFromPDV");
+const { scrapeFromPDV$ } = require("../lib/hos/scrapeFromPDV");
 
 const aegis = {
     getDetails: requestToAegis("GET", null, null, "/"),
     runBrowser: requestToAegis("GET", null, null, "/public/browser"),
-    register: null,
-    login: null,
     initializeOta: jwt => ({
         getInstitutions: (instCode = "") =>
             requestToAegisWithToken({
@@ -18,11 +17,11 @@ const aegis = {
                 path: `/ota/institutions/${instCode}`,
                 tokenOrUrl: jwt
             }),
-        start: body => {
+        start: curry((instCode, prompts) => {
             const csrf = uniqid();
             const stream$ = new BehaviorSubject({});
-            const bodyCsrf = { ...body, challenge: csrf };
-            scrapeFromPDV(jwt, csrf, bodyCsrf).subscribe(stream$);
+            const bodyCsrf = { code: instCode, prompts, challenge: csrf };
+            scrapeFromPDV$(jwt, csrf, bodyCsrf).subscribe(stream$);
             return {
                 stream$,
                 resume: otp =>
@@ -42,10 +41,17 @@ const aegis = {
                         tokenOrUrl: jwt
                     })
             }
-        },
+        }),
     })
 };
 
-// Make aegis globally available
-root.aegis = root.aegis || {};
-root.aegis = { ...root.aegis, ...aegis };
+module.exports = opts => {
+    opts = opts || {};
+    if(opts.global) {
+        // Make aegis globally available and freeze it
+        root.aegis = root.aegis || {};
+        root.aegis = { ...root.aegis, ...aegis };
+        Object.freeze(root.aegis);
+    }
+    return aegis;
+}
