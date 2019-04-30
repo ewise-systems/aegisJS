@@ -1,0 +1,13 @@
+{
+  "esversion": 9,
+  "freeze": true,
+  "node": true,
+  "noarg": true,
+  "nocomma": true,
+  "nonew": true,
+  "noreturnawait": true,
+  "strict": "implied",
+  "undef": true,
+  "unused": "vars",
+  "mocha": true
+}
