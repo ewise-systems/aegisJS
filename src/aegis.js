@@ -1,5 +1,4 @@
 const uniqid = require("uniqid");
-const root = require("window-or-global");
 const { curry } = require("ramda");
 const { BehaviorSubject } = require("rxjs");
 const { requestToAegis, requestToAegisWithToken } = require("../lib/hof/requestToAegis");
@@ -45,13 +44,5 @@ const aegis = {
     })
 };
 
-module.exports = opts => {
-    opts = opts || {};
-    if(opts.global) {
-        // Make aegis globally available and freeze it
-        root.aegis = root.aegis || {};
-        root.aegis = { ...root.aegis, ...aegis };
-        Object.freeze(root.aegis);
-    }
-    return aegis;
-}
+module.exports = () =>
+    Object.freeze(aegis)

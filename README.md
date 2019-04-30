@@ -26,12 +26,19 @@ const aegis = ewise_aegisJS();
 aegis.getDetails("http://localhost:8000").run();
 ```
 
-Alternatively, you can inject the `aegis` variable into the global scope by passing an options object with the `global` property set to `true`.
+This library returns Task monads for one-off requests to the Aegis PDV and RxJS streams for continuous requests. In the case of a Task monad being returned, it can be converted to a promise should you be more comfortable in that style. However, it is recommended to use the monadic style instead of the promise.
 
 ```javascript
-ewise_aegisJS({ global: true });
+// Monadic implementation
+aegis.getDetails("http://localhost:8000").run().listen({
+    onRejected: errorCallback,
+    onResolved: successCallback
+});
 
-aegis.getDetails("http://localhost:8000").run();
+// Promise-based implementation
+aegis.getDetails("http://localhost:8000").run().promise()
+    .then(successCallback)
+    .catch(errorCallback);
 ```
 
 ## Example

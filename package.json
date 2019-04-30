@@ -36,8 +36,7 @@
     "ramda": "^0.26.1",
     "rxjs": "^6.5.1",
     "uniqid": "^5.0.3",
-    "valid-url": "^1.0.9",
-    "window-or-global": "^1.0.1"
+    "valid-url": "^1.0.9"
   },
   "repository": {
     "type": "git",
