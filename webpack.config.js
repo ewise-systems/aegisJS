@@ -3,7 +3,7 @@ const path = require("path");
 module.exports = {
   mode: "development",
   entry: "./src/aegis.js",
-  devtool: "source-map",
+  devtool: false,
   output: {
     filename: "aegis.js",
     path: path.resolve(__dirname, "dist"),
@@ -11,5 +11,6 @@ module.exports = {
   },
   resolve: {
     extensions: [".js", ".json"]
-  }
+  },
+  plugins: []
 };

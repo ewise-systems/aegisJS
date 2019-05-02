@@ -8,6 +8,15 @@ When contributing to this repository, please make an issue to discuss any bugs o
 
 Please note we have a [code of conduct](https://github.com/ewise-systems/aegisJS/blob/develop/CODE_OF_CONDUCT.md). Please follow it in all your interactions with the project.
 
+## Philosophy
+
+We wrote this library with these concepts in mind, and wish that all contributors follow suit:
+
+1. Functions should be pure, or made pure by using higher order functions and/or monads
+2. When an object is returned from the `aegis` object, its properties are monads, monadic streams, or higher order functions
+3. Lazy evaluation is implemented such that the onus of side-effects rests purely on the consumer. As a result, when a monad is returned, it must have a `.run` method which the client calls to invoke the side-effects
+4. We will never throw an exception from within the library. Should there be an unsafe function to call, we will convert it into a safe function first
+
 ## What Contributions Are We Looking For?
 We're the most in need of the following contributions:
 
@@ -18,7 +27,7 @@ We're the most in need of the following contributions:
 If you have a feature you would like to see added in or if you find a bug, please raise an issue first.
 
 ## Writing Unit Tests
-1. No unit test is too trivial to write a test for
+1. No scenario is too trivial to write a unit test for
 2. Make one and only one assertion per `it` statement
 3. Mimic the sentence-like construction of the existing tests, and make them descriptive.
   * "it should not throw" or "describe splitArray" are good

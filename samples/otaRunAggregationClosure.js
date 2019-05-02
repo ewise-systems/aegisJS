@@ -1,13 +1,16 @@
 const doOtaRunAggregationClosure = (jwt, instCode, prompts) => {
-    const ota = aegis.initializeOta(jwt);
-    const otaControls = ota.start(instCode, prompts);
+    const aegis = ewise_aegisJS({ jwt });
+    const otaControls = aegis.initializeOta(instCode, prompts);
 
     // Make controls available to the console
     // Practice for dev/test only - don't do this in production
     window.stopOta = otaControls.stop;
 
+    // Execute the stream
+    const stream$ = otaControls.run();
+
     // Observable Implementation
-    otaControls.stream$.subscribe(data => {
+    stream$.subscribe(data => {
         let viewPort = document.querySelector("#viewPort");
 
         // Handle OTP here
