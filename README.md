@@ -72,15 +72,17 @@ For more concrete examples, take a look at the `samples/` folder. You can execut
 
 ## ewise_aegisJS
 
-### ewise_aegisJS()
+### ewise_aegisJS(options)
 
 This function wraps the `aegis` object and controls how it is instantiated.
 
+* `options` \<Object>
+  * `jwt` \<String> When provided, this is the JWT that will be used for all requests, unless specifically overriden in the function's parameters.
 * Returns: `AegisObject`
 
 ## AegisObject
 
-### getDetails(accessPoint)
+### getDetails([accessPoint])
 
 The function is called with either a URL or a JWT because a JWT is not required to learn the running PDV's version as long as you know the URL to that PDV instance.
 
@@ -91,27 +93,19 @@ The function is called with either a URL or a JWT because a JWT is not required 
 * `aegis` \<String> The version of the aegis instance.
 * `engine` \<String> The version of the engine instance.
 
-### runBrowser(accessPoint)
+### runBrowser([accessPoint])
 
 Calling this function does not do anything, but it is useful to test that the JxBrowser installation is successful. This will open a JxBrowser instance in the local device.
 
 * `accessPoint` \<String> A URL to connect to a local or remote running PDV instance, or a valid eWise-issued JWT that contains this URL.
 * Returns: `Task(Error, EmptyObject)`
 
-### initializeOta
-
-Returns an object that can get valid institutions for data aggregation and their prompts, as well as provide means to start, stop and resume the aggregation.
-
-* `jwt` \<String> A valid eWise-issued JWT.
-* Returns: `InitializeOtaObjectResult`
-
-## InitializeOtaObjectResult
-
-### getInstitutions([instCode])
+### getInstitutions([instCode[, jwt]])
 
 The institutions returned here are those that were made available to the client and can be aggregated with the proper credentials.
 
 * `instCode` \<String> An institution code that is registered in the eWise PDV.
+* `jwt` \<String> A valid eWise-issued JWT.
 * Returns: `Task(Error, GroupInstitutionsObject | OneInstitutionObject)`
 
 ##### GroupInstitutionsObject
@@ -141,27 +135,42 @@ The institutions returned here are those that were made available to the client 
 * `value` \<Boolean> A default value that must be updated with a user-supplied input if the prompt is editable.
 * `type` \<Boolean> Can be `lov` (list of values), `input` (string), `image` (base64 image data string), and `password` (sensitive string).
 
-### start(instCode, prompts)
+### initializeOta(instCode, prompts[, jwt])
 
-Upon calling this function, the aggregation will immediately run whether or not a subscriber has been attached to the stream. There is no `.run` method in this implementation.
+Returns an object that can get valid institutions for data aggregation and their prompts, as well as provide means to start, stop and resume the aggregation.
 
 * `instCode` \<String> An institution code that is registered in the eWise PDV.
 * `prompts` Array\<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
+* `jwt` \<String> A valid eWise-issued JWT.
 * Returns: `OTAControlObject`
 
-##### OTAControlObject
+## OTAControlObject
 
-An object that contains a stream and methods to control it. The stream automatically pauses when it receives an object with a `status` equal to `userInput` from the PDV server.
+### run()
 
-* `run` \<Function> Begins the polling process against the PDV server. Returns a monadic event stream which can be mapped, switched, flattened, etc. Each stream event is a `PDVPollingObject`. Subscribing to this stream will grant you access to each event.
-* `resume` \<Function> Resumes the aggregation if it is paused, allowing the stream to continue. Takes an array of Prompts as input.
-* `stop` \<Function> Terminates the aggregation, which will eventually terminate the stream.
+Upon calling this function, the aggregation will return immediately run.
+
+An object that contains a stream and methods to control it. The stream filters out data when it receives duplicate events from the PDV server.
+
+* Returns: a monadic event stream which can be mapped, switched, flattened, etc. Each stream event is a `PDVPollingObject`. Subscribing to this stream will grant you access to each event.
 
 ##### PDVPollingObject
 * `processId` \<String> A string that uniquely identifies a currently running process.
 * `profileId` \<String> A string that uniquely identifies a user's account for a certain institution.
 * `status` \<String> Describes the status of the currently running process. It can be `running`, `error`, `userInput`, `stopped`, `partial`, or `done`
 * `type` \<String> A string that describes the type of action being performed. Can be `aggregate`.
+
+### resume(prompts)
+
+Resumes the aggregation if it is paused, allowing the stream to continue. Takes an array of Prompts as input.
+
+* Returns: `Task(Error, {})`
+
+### stop()
+
+Terminates the aggregation, which will eventually terminate the stream.
+
+* Returns: `Task(Error, {})`
 
 ## Contributing and Community Guidelines
 Please see our [contributing guide](https://github.com/ewise-systems/aegisJS/blob/develop/CONTRIBUTING.md) and our [code of conduct](https://github.com/ewise-systems/aegisJS/blob/develop/CODE_OF_CONDUCT.md) for guides on how to contribute to this project.

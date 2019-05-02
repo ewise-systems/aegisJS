@@ -1,7 +1,7 @@
 const uniqid = require("uniqid");
 const { BehaviorSubject } = require("rxjs");
-const { requestToAegis, requestToAegisWithToken } = require("../lib/hof/requestToAegis");
 const { toObservable } = require("../lib/frpcore/transforms");
+const { requestToAegisWithToken } = require("../lib/hof/requestToAegis");
 const { kickstart$: createPollingStream } = require("../lib/hos/pollingCore");
 
 const HTTP_VERBS = {
@@ -28,25 +28,23 @@ const aegis = (options = {}) => {
     const { jwt: defaultJwt } = options;
 
     return {
-        getDetails: defaultJwt ?
+        getDetails: (jwt = defaultJwt) =>
             requestToAegisWithToken({
                 method: HTTP_VERBS.GET,
                 jwt: null,
                 body: null,
                 path: PDV_PATHS.GET_DETAILS,
-                tokenOrUrl: defaultJwt
-            }) :
-            requestToAegis(HTTP_VERBS.GET, null, null, PDV_PATHS.GET_DETAILS),
+                tokenOrUrl: jwt
+            }),
 
-        runBrowser: defaultJwt ?
+        runBrowser: (jwt = defaultJwt) =>
             requestToAegisWithToken({
                 method: HTTP_VERBS.GET,
                 jwt: null,
                 body: null,
                 path: PDV_PATHS.RUN_BROWSER,
-                tokenOrUrl: defaultJwt
-            }) :
-            requestToAegis(HTTP_VERBS.GET, null, null, PDV_PATHS.RUN_BROWSER),
+                tokenOrUrl: jwt
+            }),
 
         getInstitutions: (instCode, jwt = defaultJwt) =>
             requestToAegisWithToken({
