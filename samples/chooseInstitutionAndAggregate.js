@@ -2,10 +2,10 @@ const chooseInstitutionAndAggregate = async () => {
     const input = prompt("Please enter a JWT or PDV URL");
     if(!input) return;
 
-    const ota = aegis.initializeOta(input);
-    const x = ota.getInstitutions();
+    const aegis = ewise_aegisJS({ jwt: input });
+    const institutionsResult = aegis.getInstitutions();
 
-    const data = await x.run().promise();
+    const data = await institutionsResult.run().promise();
 
     document.getElementById("viewPort").appendChild(
         document.createElement("br")
@@ -39,7 +39,7 @@ const chooseInstitutionAndAggregate = async () => {
         btn.innerText = "Submit";
         btn.addEventListener("click", async () => {
             const instCode = sel.value;
-            const y = ota.getInstitutions(instCode);
+            const y = aegis.getInstitutions(instCode);
             const prompts = await y.run().promise();
 
             renderPromptsToScreen(input, prompts);

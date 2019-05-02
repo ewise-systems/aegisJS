@@ -1,6 +1,6 @@
 # aegisJS
 
-[![Build Status](https://travis-ci.org/ewise-systems/aegisJS.svg?branch=develop)](https://travis-ci.org/ewise-systems/aegisJS) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](code-of-conduct.md)
+[![Build Status](https://travis-ci.org/ewise-systems/aegisJS.svg?branch=develop)](https://travis-ci.org/ewise-systems/aegisJS) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](code-of-conduct.md) [![dependencies Status](https://david-dm.org/ewise-systems/aegisJS/status.svg)](https://david-dm.org/ewise-systems/aegisJS)
 
 Server side data aggregation using eWise Systems' Aegis 2.0 architecture.
 
@@ -67,6 +67,8 @@ details
 .then(successCallback('promise'))
 .catch(errorCallback('promise'));
 ```
+
+For more concrete examples, take a look at the `samples/` folder. You can execute these functions by running `npm start` and visiting `localhost:3000`. These functions, as well as the `aegis` object, should be available in the global scope for you to play with and learn from.
 
 ## ewise_aegisJS
 
@@ -151,7 +153,7 @@ Upon calling this function, the aggregation will immediately run whether or not 
 
 An object that contains a stream and methods to control it. The stream automatically pauses when it receives an object with a `status` equal to `userInput` from the PDV server.
 
-* `stream$` \<Stream> A monadic event stream which can be mapped, switched, flattened, etc. Each event is a `PDVPollingObject`. Subscribing to this stream will grant you access to its data.
+* `run` \<Function> Begins the polling process against the PDV server. Returns a monadic event stream which can be mapped, switched, flattened, etc. Each stream event is a `PDVPollingObject`. Subscribing to this stream will grant you access to each event.
 * `resume` \<Function> Resumes the aggregation if it is paused, allowing the stream to continue. Takes an array of Prompts as input.
 * `stop` \<Function> Terminates the aggregation, which will eventually terminate the stream.
 
