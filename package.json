@@ -20,7 +20,7 @@
     "ewise",
     "aegis"
   ],
-  "author": "Rene Calunsag Jr, Jan Almazora",
+  "author": "Rene Calunsag Jr",
   "license": "MIT",
   "devDependencies": {
     "body-parser": "^1.18.3",
