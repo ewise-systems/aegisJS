@@ -110,16 +110,7 @@ const aegis = (options = {}) => {
                         tokenOrUrl: jwt
                     })                
             };
-        },
-                
-        resumeSuspendedProcess: (processId, prompts, jwt = defaultJwt) => 
-            requestToAegisWithToken({
-                method: HTTP_VERBS.POST,
-                jwt,
-                body: {prompts:prompts},
-                path: PDV_PATHS.GET_PROCESS(processId),
-                tokenOrUrl: jwt
-            })        
+        }       
     };
 };
 
