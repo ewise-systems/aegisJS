@@ -27,44 +27,34 @@ const runSafeOpsTestSuite = args => {
     } = args;
 
     const assertPropertyArgs = new Array(argsCount).fill(fc.anything());
-    const fcAssertProperty = fn => compose(fc.assert, fc.property)(...assertPropertyArgs, fn);
-    // const x = (desc, fn) => it(desc, () => fcAssertProperty(fn));
+    const fcAssertProperty = (args, fn) => compose(fc.assert, fc.property)(...args, fn);
+    fc.it = (desc, fn) => it(desc, () => fcAssertProperty(assertPropertyArgs, fn));
 
     describe(`when ${cut.name} is called`, () => {
         it("should be a function", () => {
             cut.should.be.a("function");
         });
         
-        it("should create Result for any input", () => {
-            fcAssertProperty((...input) => {
-                Result.hasInstance(cut(...input)).should.be.true;
-            });
+        fc.it("should create Result for any input", (...input) => {
+            Result.hasInstance(cut(...input)).should.be.true;
         });
 
-        if(outputType) {
-            it(`should create Result that holds ${outputType.name} for any ${inputType.name}`, () => {
-                fcAssertProperty((...input) => {
-                    if(input.reduce((acc, i) => i instanceof inputType && acc, true))
-                        cut(...input).getOrElse(null).should.be.an.instanceof(outputType);
-                });
-            });
-        }
+        outputType && fc.it(`should create Result that holds ${outputType.name} for any ${inputType.name}`, (...input) => {
+            if(input.reduce((acc, i) => i instanceof inputType && acc, true))
+                cut(...input).getOrElse(null).should.be.an.instanceof(outputType);
+        });
 
-        it(`should create Result that holds null for any non-${inputType.name}`, () => {
-            fcAssertProperty((...input) => {
-                if(input.reduce((acc, i) => i instanceof inputType && acc, true))
-                    expect(cut(...input).getOrElse(null)).to.be.null;
-            });
+        fc.it(`should create Result that holds null for any non-${inputType.name}`, (...input) => {
+            if(input.reduce((acc, i) => i instanceof inputType && acc, true))
+                expect(cut(...input).getOrElse(null)).to.be.null;
         });
 
         it("should not throw when not fed an argument", () => {
             cut.should.not.throw();
         });
 
-        it("should not throw for any argument", () => {
-            fcAssertProperty((...input) => {
-                expect(() => cut(...input)).to.not.throw();
-            });
+        fc.it("should not throw for any argument", (...input) => {
+            expect(() => cut(...input)).to.not.throw();
         });
     });
 };
