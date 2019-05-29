@@ -20,7 +20,8 @@ const PDV_PATHS = {
     RESUME_OTA: (pid = "") => `/ota/process/${pid}`,
     STOP_OTA: (pid, csrf = "") => `ota/process/${pid}?challenge=${csrf}`,
     ADD_PROFILE: "/profiles",
-    GET_PROCESS: (processId) => `/processes/${processId}`
+    GET_PROCESS: (processId) => `/processes/${processId}`,
+    RESUME_PROCESS: (processId) => `/processes/${processId}`
 };
 
 const TERMINAL_PDV_STATES = ["error", "partial", "stopped", "done"];
@@ -101,12 +102,12 @@ const aegis = (options = {}) => {
             return {
                 run: () =>
                     stream$.subscribe(subject$) && subject$,
-                resume: () =>
+                resume: prompts =>
                     requestToAegisWithToken({
                         method: HTTP_VERBS.POST,
                         jwt,
-                        body: { prompts:prompts },
-                        path: PDV_PATHS.GET_PROCESS(subject$.value.processId),
+                        body: { code:instCode, ...prompts },
+                        path: PDV_PATHS.RESUME_PROCESS(subject$.value.processId),
                         tokenOrUrl: jwt
                     })                
             };
