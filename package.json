@@ -8,7 +8,7 @@
     "clean": "rimraf dist",
     "lint": "jshint .",
     "test": "nyc --reporter text mocha --recursive test/*.spec.js",
-    "lint-test": "npm run lint && npm run test",
+    "lint-test": "npm run lint && npm test",
     "bundle": "webpack --config webpack.config.js",
     "prebuild": "npm run clean",
     "build": "npm run lint-test && npm run bundle",

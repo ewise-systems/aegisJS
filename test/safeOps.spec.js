@@ -19,18 +19,20 @@ const { compose } = require("ramda");
 const runSafeOpsTestSuite = args => {
     const {
         cut,
+        name,
         argsCount = 1,
         types: {
             inp : inputType = String,
             out: outputType
-        }
+        } = {}
     } = args;
 
+    const checkType = (sub, type) => typeof sub === type.name.toLowerCase() || sub instanceof type;
     const assertPropertyArgs = new Array(argsCount).fill(fc.anything());
     const fcAssertProperty = (args, fn) => compose(fc.assert, fc.property)(...args, fn);
     fc.it = (desc, fn) => it(desc, () => fcAssertProperty(assertPropertyArgs, fn));
 
-    describe(`when ${cut.name} is called`, () => {
+    describe(`when ${name || cut.name} is called`, () => {
         it("should be a function", () => {
             cut.should.be.a("function");
         });
@@ -40,12 +42,12 @@ const runSafeOpsTestSuite = args => {
         });
 
         outputType && fc.it(`should create Result that holds ${outputType.name} for any ${inputType.name}`, (...input) => {
-            if(input.reduce((acc, i) => i instanceof inputType && acc, true))
+            if(input.reduce((acc, i) => checkType(i, inputType) && acc, true))
                 cut(...input).getOrElse(null).should.be.an.instanceof(outputType);
         });
 
         fc.it(`should create Result that holds null for any non-${inputType.name}`, (...input) => {
-            if(input.reduce((acc, i) => i instanceof inputType && acc, true))
+            if(!input.reduce((acc, i) => checkType(i, inputType) && acc, true))
                 expect(cut(...input).getOrElse(null)).to.be.null;
         });
 
@@ -60,9 +62,9 @@ const runSafeOpsTestSuite = args => {
 };
 
 runSafeOpsTestSuite({ cut: safeSplit, types: { out: Array } });
-runSafeOpsTestSuite({ cut: safeNth, types: { inp: Number } });
-runSafeOpsTestSuite({ cut: safeBase64ToBuffer, types: { out: Array } });
-runSafeOpsTestSuite({ cut: safeJsonParse, types: { out: Object } });
-runSafeOpsTestSuite({ cut: safeIsWebUri, types: { out: Boolean } });
-runSafeOpsTestSuite({ cut: safeMakeWebUrl, argsCount: 2, types: { out: String } });
-runSafeOpsTestSuite({ cut: safeGetAegisUrl, types: { out: String } });
+runSafeOpsTestSuite({ cut: safeNth, types: { inp: Array } });
+runSafeOpsTestSuite({ cut: safeBase64ToBuffer, types: { out: Buffer } });
+runSafeOpsTestSuite({ cut: safeJsonParse });
+runSafeOpsTestSuite({ cut: safeIsWebUri });
+runSafeOpsTestSuite({ cut: safeMakeWebUrl, name: 'safeMakeWebUrl', argsCount: 2 });
+runSafeOpsTestSuite({ cut: safeGetAegisUrl });

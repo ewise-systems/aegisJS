@@ -1,0 +1,71 @@
+{
+    "jwtSchema": {
+        "type": "object",
+        "properties": {
+            "iss": {
+                "type": "string",
+                "format": "uri"
+            },
+            "aegis": {
+                "type": "string",
+                "format": "uri"
+            },
+            "tenant": {
+                "type": "string"
+            },
+            "origins": {
+                "type": "string",
+                "format": "uri"
+            },
+            "sub": {
+                "type": "string"
+            },
+            "email": {
+                "type": "string",
+                "format": "email"
+            },
+            "iat": {
+                "type": "number"
+            },
+            "exp": {
+                "type": "number"
+            },
+            "services": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "institutions": {
+                "type": "array",
+                "items": {
+                    "type": "number"
+                }
+            },
+            "hashes": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "swan": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "required": [
+            "iss",
+            "aegis",
+            "tenant",
+            "origins",
+            "sub",
+            "email",
+            "iat",
+            "exp",
+            "services",
+            "institutions",
+            "hashes",
+            "swan"
+        ]
+    }
+}
