@@ -20,8 +20,9 @@ const PDV_PATHS = {
     RESUME_OTA: (pid = "") => `/ota/process/${pid}`,
     STOP_OTA: (pid, csrf = "") => `ota/process/${pid}?challenge=${csrf}`,
     ADD_PROFILE: "/profiles",
-    GET_PROCESS: (processId) => `/processes/${processId}`,
-    RESUME_PROCESS: (processId) => `/processes/${processId}`
+    GET_PROFILES: (pid = "", cred = false) => `/profiles/${pid}${cred ? "" : "/credential"}`,
+    GET_PROCESS: (pid) => `/processes/${pid}`,
+    RESUME_PROCESS: (pid) => `/processes/${pid}`
 };
 
 const TERMINAL_PDV_STATES = ["error", "partial", "stopped", "done"];
@@ -93,7 +94,7 @@ const aegis = (options = {}) => {
         addProfile: (instCode, prompts, jwt = defaultJwt) => {
             const subject$ = new BehaviorSubject({ value: null });
 
-            const body = { code: instCode, prompts: prompts};
+            const body = { code: instCode, prompts: prompts };
 
             const initialStream$ = toObservable(HTTP_VERBS.POST, jwt, body, PDV_PATHS.ADD_PROFILE);
             const pollingStream$ = pid => toObservable(HTTP_VERBS.GET, jwt, null, PDV_PATHS.GET_PROCESS(pid));
@@ -106,12 +107,21 @@ const aegis = (options = {}) => {
                     requestToAegisWithToken({
                         method: HTTP_VERBS.POST,
                         jwt,
-                        body: { code:instCode, ...prompts },
+                        body: { code: instCode, ...prompts },
                         path: PDV_PATHS.RESUME_PROCESS(subject$.value.processId),
                         tokenOrUrl: jwt
-                    })                
+                    })
             };
-        }       
+        },
+
+        queryProfile: (pid = "", cred = false, jwt = defaultJwt) =>
+            requestToAegisWithToken({
+                method: HTTP_VERBS.GET,
+                jwt,
+                body: null,
+                path: PDV_PATHS.GET_PROFILES(pid, cred),
+                tokenOrUrl: jwt
+            })
     };
 };
 
