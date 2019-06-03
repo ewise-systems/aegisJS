@@ -20,7 +20,7 @@ const PDV_PATHS = {
     RESUME_OTA: (pid = "") => `/ota/process/${pid}`,
     STOP_OTA: (pid, csrf = "") => `ota/process/${pid}?challenge=${csrf}`,
     ADD_PROFILE: "/profiles",
-    GET_PROFILES: (pid = "", cred = false) => `/profiles/${pid}${cred ? "" : "/credential"}`,
+    GET_PROFILES: (pid = "", cred = false) => `/profiles/${pid}${cred ? "/credential" : ""}`,
     GET_PROCESS: (pid) => `/processes/${pid}`,
     RESUME_PROCESS: (pid) => `/processes/${pid}`,
     GET_ACCOUNTS: "/accounts",
@@ -116,7 +116,7 @@ const aegis = (options = {}) => {
             };
         },
 
-        queryProfile: (pid = "", cred = false, jwt = defaultJwt) =>
+        getProfiles: (pid = "", cred = false, jwt = defaultJwt) =>
             requestToAegisWithToken({
                 method: HTTP_VERBS.GET,
                 jwt,
@@ -125,7 +125,7 @@ const aegis = (options = {}) => {
                 tokenOrUrl: jwt
             }),
         
-        queryAccounts: (jwt = defaultJwt) =>
+        getAccounts: (jwt = defaultJwt) =>
             requestToAegisWithToken({
                 method: HTTP_VERBS.GET,
                 jwt,
@@ -134,7 +134,7 @@ const aegis = (options = {}) => {
                 tokenOrUrl: jwt
             }),
         
-        queryTransactions: (jwt = defaultJwt) =>
+        getTransactions: (jwt = defaultJwt) =>
             requestToAegisWithToken({
                 method: HTTP_VERBS.GET,
                 jwt,
