@@ -41,7 +41,8 @@ const runSafeOpsTestSuite = args => {
             Result.hasInstance(cut(...input)).should.be.true;
         });
 
-        outputType && fc.it(`should create Result that holds ${outputType.name} for any ${inputType.name}`, (...input) => {
+        outputType &&
+        fc.it(`should create Result that holds ${outputType.name} for any ${inputType.name}`, (...input) => {
             if(input.reduce((acc, i) => checkType(i, inputType) && acc, true))
                 cut(...input).getOrElse(null).should.be.an.instanceof(outputType);
         });
