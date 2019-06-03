@@ -22,7 +22,9 @@ const PDV_PATHS = {
     ADD_PROFILE: "/profiles",
     GET_PROFILES: (pid = "", cred = false) => `/profiles/${pid}${cred ? "" : "/credential"}`,
     GET_PROCESS: (pid) => `/processes/${pid}`,
-    RESUME_PROCESS: (pid) => `/processes/${pid}`
+    RESUME_PROCESS: (pid) => `/processes/${pid}`,
+    GET_ACCOUNTS: "/accounts",
+    GET_TRANSACTIONS: "/transactions"
 };
 
 const TERMINAL_PDV_STATES = ["error", "partial", "stopped", "done"];
@@ -120,6 +122,24 @@ const aegis = (options = {}) => {
                 jwt,
                 body: null,
                 path: PDV_PATHS.GET_PROFILES(pid, cred),
+                tokenOrUrl: jwt
+            }),
+        
+        queryAccounts: (jwt = defaultJwt) =>
+            requestToAegisWithToken({
+                method: HTTP_VERBS.GET,
+                jwt,
+                body: null,
+                path: PDV_PATHS.GET_ACCOUNTS,
+                tokenOrUrl: jwt
+            }),
+        
+        queryTransactions: (jwt = defaultJwt) =>
+            requestToAegisWithToken({
+                method: HTTP_VERBS.GET,
+                jwt,
+                body: null,
+                path: PDV_PATHS.GET_TRANSACTIONS,
                 tokenOrUrl: jwt
             })
     };
