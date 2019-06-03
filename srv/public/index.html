@@ -3,6 +3,7 @@
     <body>
         <button id="clear">Clear</button> <button id="start">Start</button> <button id="stop">Stop</button>
         <button id="addProfile">Add Profile</button>
+        <button id="getProfiles">Get Profiles</button>
         <br/>
         <div id="viewPort"></div>
 
@@ -16,6 +17,7 @@
         <script type="text/javascript" src="/samples/otaRunAggregationClosure.js"></script>
         <script type="text/javascript" src="/samples/chooseInstitutionAndAggregate.js"></script>
         <script type="text/javascript" src="/samples/addProfile.js"></script>
+        <script type="text/javascript" src="/samples/getProfiles.js"></script>
         <script>
             document
                 .querySelector("#clear")
@@ -39,6 +41,12 @@
                 .querySelector("#addProfile")
                 .addEventListener("click", () =>
                     addProfile()
+            );
+
+            document
+                .querySelector("#getProfiles")
+                .addEventListener("click", () =>
+                    getProfiles()
             );
         </script>
     </body>
