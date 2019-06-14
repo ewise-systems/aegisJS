@@ -24,7 +24,8 @@ const runSafeOpsTestSuite = args => {
         types: {
             inp : inputType = String,
             out: outputType
-        } = {}
+        } = {},
+        manual
     } = args;
 
     const checkType = (sub, type) => typeof sub === type.name.toLowerCase() || sub instanceof type;
@@ -59,13 +60,69 @@ const runSafeOpsTestSuite = args => {
         fc.it("should not throw for any argument", (...input) => {
             expect(() => cut(...input)).to.not.throw();
         });
+
+        /*
+            Manual testing.
+            This statement checks for equality between the supplied `inp` and `out`.
+        */
+        manual &&
+        it(`[MANUAL] ${manual.desc}`, () => {
+            manual.tests.forEach(({inp, out}) =>
+                cut(inp).getOrElse(null).should.deep.equal(out)
+            );
+        });
     });
 };
 
 runSafeOpsTestSuite({ cut: safeSplit, types: { out: Array } });
+
 runSafeOpsTestSuite({ cut: safeNth, types: { inp: Array } });
+
 runSafeOpsTestSuite({ cut: safeBase64ToBuffer, types: { out: Buffer } });
-runSafeOpsTestSuite({ cut: safeJsonParse });
+
+runSafeOpsTestSuite({ cut: safeJsonParse, manual: {
+    desc: "should parse the string that was given",
+    tests: [
+        {
+            inp: "{}",
+            out: {}
+        },
+        {
+            inp: "[]",
+            out: []
+        }
+    ]
+}});
+
 runSafeOpsTestSuite({ cut: safeIsWebUri });
+
 runSafeOpsTestSuite({ cut: safeMakeWebUrl, name: 'safeMakeWebUrl', argsCount: 2 });
-runSafeOpsTestSuite({ cut: safeGetAegisUrl });
+
+runSafeOpsTestSuite({ cut: safeGetAegisUrl, manual: {
+    desc: "should return the aegis url when fed a valid object",
+    tests: [
+        {
+            inp: {
+                "iss": "https://www1.ewise.com",
+                "aegis": "https://www2.ewise.com",
+                "tenant": "test-tenant",
+                "origins": "https://www3.ewise.com",
+                "email": "testemail@testemail.com",
+                "sub": "test-sub",
+                "iat": 1560404776905,
+                "exp": 2560409776905,
+                "services": [
+                    "SVC01"
+                ],
+                "institutions": [
+                    1111
+                ],
+                "hashes": [
+                    "hashes01"
+                ],
+                "swan": "https://www.ewise.com"
+            },
+            out: "https://www2.ewise.com"
+        }
+    ]
+}});
