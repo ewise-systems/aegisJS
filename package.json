@@ -1,5 +1,5 @@
 {
-  "name": "@reneewise/aegisjs",
+  "name": "@ewise/aegisjs",
   "version": "0.0.1",
   "description": "Open source library for interacting with eWise Systems' Aegis 2.0 architecture",
   "main": "src/aegis.js",
@@ -7,14 +7,12 @@
     "prepublish": "npm run build",
     "clean": "rimraf dist",
     "lint": "jshint .",
-    "test": "nyc --reporter text mocha --recursive test/*.spec.js",
-    "lint-test": "npm run lint && npm test",
     "bundle": "webpack --config webpack.config.js",
     "prebuild": "npm run clean",
-    "build": "npm run lint-test && npm run bundle",
+    "build": "npm run lint && npm run bundle",
     "start": "npm run build && node srv/testApp.js",
     "preartifice": "rimraf .nyc_output coverage mocha_test_results.xml",
-    "artifice": "npm run lint-test -- -- --reporter=xunit --reporter-options output=mocha_test_results.xml && nyc report"
+    "artifice": "npm run lint -- -- --reporter=xunit --reporter-options output=mocha_test_results.xml && nyc report"
   },
   "keywords": [
     "ewise",
@@ -38,6 +36,7 @@
     "webpack-cli": "^3.3.0"
   },
   "dependencies": {
+    "@ewise/aegisjs-core": "0.0.3",
     "ajv": "^6.10.0",
     "axios": "^0.18.1",
     "folktale": "^2.3.2",
