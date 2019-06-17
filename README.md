@@ -100,41 +100,6 @@ Calling this function does not do anything, but it is useful to test that the Jx
 * `accessPoint` \<String> A URL to connect to a local or remote running PDV instance, or a valid eWise-issued JWT that contains this URL.
 * Returns: `Task(Error, EmptyObject)`
 
-### getInstitutions([instCode[, jwt]])
-
-The institutions returned here are those that were made available to the client and can be aggregated with the proper credentials.
-
-* `instCode` \<String> An institution code that is registered in the eWise PDV.
-* `jwt` \<String> A valid eWise-issued JWT.
-* Returns: `Task(Error, GroupInstitutionsObject | OneInstitutionObject)`
-
-##### GroupInstitutionsObject
-* `content` Array\<InstitutionGroup>
-
-##### InstitutionGroup
-* `name` \<String> The name of the institution group.
-* `description` \<String> A description of the institution group.
-* `institutions` Array\<Institution> A list of valid instutitions.
-
-##### Institution
-* `code` \<Number> A digit that represents a valid institution that can be aggregated.
-* `name` \<String> The name of the institution.
-
-##### OneInstitutionObject
-* `code` \<Number> A digit that represents a valid institution that can be aggregated.
-* `name` \<String> The name of the institution.
-* `prompts` Array\<InstitutionPrompt> A list of prompts required by the institution.
-
-##### InstitutionPrompt
-* `editable` \<Boolean> Describes if the prompt's value can be changed.
-* `index` \<Integer> Positional descriptor of the prompt in an array.
-* `key` \<String> The `key` value which must be returned to the PDV upon supplying the prompt's value.
-* `label` \<String> The text that should be displayed to the user upon requesting for the prompt.
-* `primary` \<Boolean> Whether the prompt is the main one or not.
-* `required` \<Boolean> Whether the prompt is required or not.
-* `value` \<Boolean> A default value that must be updated with a user-supplied input if the prompt is editable.
-* `type` \<Boolean> Can be `lov` (list of values), `input` (string), `image` (base64 image data string), and `password` (sensitive string).
-
 ### initializeOta(instCode, prompts[, jwt])
 
 Returns an object that can get valid institutions for data aggregation and their prompts, as well as provide means to start, stop and resume the aggregation.
