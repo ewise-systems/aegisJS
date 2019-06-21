@@ -37,8 +37,8 @@ const getProfiles = async() => {
     let btn = document.createElement("button");
     btn.innerText = "Submit";
     btn.addEventListener("click", async () => {
-        const instCode = sel.value;
-        const y = aegis.getProfiles(instCode);
+        const profileId = sel.value;
+        const y = aegis.getProfiles({ profileId });
         const profile = await y.run().promise();
         renderProfileToScreen(aegis, profile);
     });
@@ -52,7 +52,7 @@ const getProfiles = async() => {
     );
 };
 
-const renderProfileToScreen = (aegis, profile) => {
+const renderProfileToScreen = (aegis, { profileId, instCode }) => {
     const resultContainer = document.createElement("pre");
     resultContainer.id = "resultContainer";
     document.getElementById("viewPort").appendChild(resultContainer);
@@ -60,7 +60,7 @@ const renderProfileToScreen = (aegis, profile) => {
     let getCredsBtn = document.createElement("button");
     getCredsBtn.innerText = "Get Credentials";
     getCredsBtn.addEventListener("click", async () => {
-        const y = aegis.getProfiles(profile.profileId, true);
+        const y = aegis.getProfiles({ profileId, creds: true });
         const creds = await y.run().promise();
         document.getElementById("resultContainer").innerHTML = JSON.stringify(creds, null, 2);
     });
@@ -83,4 +83,28 @@ const renderProfileToScreen = (aegis, profile) => {
         document.getElementById("resultContainer").innerHTML = JSON.stringify(txns, null, 2);
     });
     document.getElementById("viewPort").appendChild(getTxnsBtn);
+
+    let updateProfilesBtn = document.createElement("button");
+    updateProfilesBtn.innerText = "Update Profiles";
+    updateProfilesBtn.addEventListener("click", async () => {
+        // TODO: Subscribe to stream and render data/OTP to screen
+        aegis.updateProfile({ profileId }).run().subscribe(
+            console.log,
+            console.warn,
+            () => document.getElementById("resultContainer").innerHTML = "DONE"
+        );
+    });
+    document.getElementById("viewPort").appendChild(updateProfilesBtn);
+
+    let updateBasicProfilesBtn = document.createElement("button");
+    updateBasicProfilesBtn.innerText = "Update Basic Profiles";
+    updateBasicProfilesBtn.addEventListener("click", async () => {
+        // TODO: Subscribe to stream and render data/OTP to screen
+        aegis.updateBasicProfile({ profileId }).run().subscribe(
+            console.log,
+            console.warn,
+            () => document.getElementById("resultContainer").innerHTML = "DONE"
+        );
+    });
+    document.getElementById("viewPort").appendChild(updateBasicProfilesBtn);
 };
