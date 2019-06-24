@@ -1,4 +1,4 @@
-const addProfile = async() => {    
+const addBasicProfile = async() => {    
     const input = prompt("Please enter a JWT or PDV URL");
     if(!input) return;
     
@@ -41,7 +41,7 @@ const addProfile = async() => {
             const instCode = sel.value;
             const y = aegis.getInstitutions({ instCode });
             const prompts = await y.run().promise();            
-            renderPromptsToScreenAddProfile(input, prompts);
+            renderPromptsToScreenAddBasicProfile(input, prompts);
         });
         document.getElementById("viewPort").appendChild(btn);
 
@@ -54,7 +54,7 @@ const addProfile = async() => {
     });
 };
 
-const renderPromptsToScreenAddProfile = (jwt, prompts) => {
+const renderPromptsToScreenAddBasicProfile = (jwt, prompts) => {
     let instCodeLabel = document.createElement("span");
     instCodeLabel.innerText = `name: ${prompts.name} | code: ${prompts.code}`;
 
@@ -80,7 +80,7 @@ const renderPromptsToScreenAddProfile = (jwt, prompts) => {
     let btn = document.createElement("button");
     btn.innerText = "Submit";
     btn.addEventListener("click", async () => {
-        doOtaRunAggregationClosureAddProfile(
+        doOtaRunAggregationClosureAddBasicProfile(
             jwt,
             prompts.code,
             Array.prototype.map.call(
@@ -98,9 +98,9 @@ const renderPromptsToScreenAddProfile = (jwt, prompts) => {
     document.getElementById("viewPort").appendChild(btn);
 };
 
-const doOtaRunAggregationClosureAddProfile = (jwt, instCode, prompts) => {
+const doOtaRunAggregationClosureAddBasicProfile = (jwt, instCode, prompts) => {
     const aegis = ewise_aegisJS({ jwt });    
-    const otaControls = aegis.addProfile({ instCode, prompts });
+    const otaControls = aegis.addBasicProfile({ instCode, prompts });
 
     // Make controls available to the console
     // Practice for dev/test only - don't do this in production
