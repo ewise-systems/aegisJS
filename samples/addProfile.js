@@ -39,7 +39,7 @@ const addProfile = async() => {
         btn.innerText = "Submit";
         btn.addEventListener("click", async () => {
             const instCode = sel.value;
-            const y = aegis.getInstitutions(instCode);
+            const y = aegis.getInstitutions({ instCode });
             const prompts = await y.run().promise();            
             renderPromptsToScreenAddProfile(input, prompts);
         });
@@ -100,7 +100,7 @@ const renderPromptsToScreenAddProfile = (jwt, prompts) => {
 
 const doOtaRunAggregationClosureAddProfile = (jwt, instCode, prompts) => {
     const aegis = ewise_aegisJS({ jwt });    
-    const otaControls = aegis.addProfile(instCode, prompts);
+    const otaControls = aegis.addProfile({ instCode, prompts });
 
     // Make controls available to the console
     // Practice for dev/test only - don't do this in production
