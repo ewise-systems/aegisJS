@@ -296,23 +296,25 @@ const aegis = (options = {}) => {
             });
         },
         
-        getAccounts: (jwt = defaultJwt) =>
-            requestToAegisWithToken({
-                method: HTTP_VERBS.GET,
+        getAccounts: (args = {}) => {
+            const { jwt = defaultJwt } = args;
+            return requestToAegisWithToken(
+                HTTP_VERBS.GET,
                 jwt,
-                body: null,
-                path: PDV_PATHS.GET_ACCOUNTS,
-                tokenOrUrl: jwt
-            }),
+                null,
+                PDV_PATHS.GET_ACCOUNTS
+            );
+        },
         
-        getTransactions: (jwt = defaultJwt) =>
-            requestToAegisWithToken({
-                method: HTTP_VERBS.GET,
+        getTransactions: (args = {}) => {
+            const { jwt = defaultJwt } = args;
+            return requestToAegisWithToken(
+                HTTP_VERBS.GET,
                 jwt,
-                body: null,
-                path: PDV_PATHS.GET_TRANSACTIONS,
-                tokenOrUrl: jwt
-            })
+                null,
+                PDV_PATHS.GET_TRANSACTIONS
+            );
+        }
     };
 };
 
