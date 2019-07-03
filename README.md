@@ -11,7 +11,7 @@ To use this package at all, you must have separately installed the [eWise Aegis 
 Once you have secured your access, use the package manager [npm](https://www.npmjs.com/) to install aegisJS.
 
 ```bash
-npm install aegisJS
+npm install @ewise/aegisjs
 ```
 
 Alternatively, you can download the aegisJS file from the eWise CDN (to be hosted).
@@ -77,16 +77,17 @@ For more concrete examples, take a look at the `samples/` folder. You can execut
 This function wraps the `aegis` object and controls how it is instantiated.
 
 * `options` \<Object>
-  * `jwt` \<String> When provided, this is the JWT that will be used for all requests, unless specifically overriden in the function's parameters.
+  * `jwt` \<String> When provided, this is the JWT that will be used for all requests, unless specifically overriden in the function's parameters. When provided, this value becomes `defaultJwt`
 * Returns: `AegisObject`
 
 ## AegisObject
 
-### getDetails([accessPoint])
+### getDetails([options])
 
-The function is called with either a URL or a JWT because a JWT is not required to learn the running PDV's version as long as you know the URL to that PDV instance.
+This function handles getting the details of the eWise engine you are connecting to.
 
-* `accessPoint` \<String> A URL to connect to a local or remote running PDV instance, or a valid eWise-issued JWT that contains this URL.
+* `options` \<Object>
+  * `jwtOrUrl` \<String> A URL to connect to a local or remote running PDV instance, or a valid eWise-issued JWT that contains this URL. A JWT is not required to learn the running PDV's version as long as you know the URL to that PDV instance. Default: `defaultJwt`
 * Returns: `Task(Error, AegisDetailsObjectResult)`
 
 ##### AegisDetailsObjectResult
@@ -95,21 +96,59 @@ The function is called with either a URL or a JWT because a JWT is not required 
 
 ### runBrowser([accessPoint])
 
-Calling this function does not do anything, but it is useful to test that the JxBrowser installation is successful. This will open a JxBrowser instance in the local device.
+Calling this function will open a JxBrowser instance in the local device.
 
-* `accessPoint` \<String> A URL to connect to a local or remote running PDV instance, or a valid eWise-issued JWT that contains this URL.
+* `options` \<Object>
+  * `jwtOrUrl` \<String> A URL to connect to a local or remote running PDV instance, or a valid eWise-issued JWT that contains this URL. A JWT is not required to learn the running PDV's version as long as you know the URL to that PDV instance. Default: `defaultJwt`
 * Returns: `Task(Error, EmptyObject)`
 
-### initializeOta(instCode, prompts[, jwt])
+### getInstitutions([options])
+
+The institutions returned here are those that were made available to the client and can be aggregated with the proper credentials.
+
+* `options` \<Object>
+  * `instCode` \<String> An institution code that is registered in the eWise PDV.
+  * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+* Returns: `Task(Error, GroupInstitutionsObject | OneInstitutionObject)`
+
+##### GroupInstitutionsObject
+* `content` Array\<InstitutionGroup>
+
+##### InstitutionGroup
+* `name` \<String> The name of the institution group.
+* `description` \<String> A description of the institution group.
+* `institutions` Array\<Institution> A list of valid instutitions.
+
+##### Institution
+* `code` \<Number> A digit that represents a valid institution that can be aggregated.
+* `name` \<String> The name of the institution.
+
+##### OneInstitutionObject
+* `code` \<Number> A digit that represents a valid institution that can be aggregated.
+* `name` \<String> The name of the institution.
+* `prompts` Array\<InstitutionPrompt> A list of prompts required by the institution.
+
+##### InstitutionPrompt
+* `editable` \<Boolean> Describes if the prompt's value can be changed.
+* `index` \<Integer> Positional descriptor of the prompt in an array.
+* `key` \<String> The `key` value which must be returned to the PDV upon supplying the prompt's value.
+* `label` \<String> The text that should be displayed to the user upon requesting for the prompt.
+* `primary` \<Boolean> Whether the prompt is the main one or not.
+* `required` \<Boolean> Whether the prompt is required or not.
+* `value` \<Boolean> A default value that must be updated with a user-supplied input if the prompt is editable.
+* `type` \<Boolean> Can be `lov` (list of values), `input` (string), `image` (base64 image data string), and `password` (sensitive string).
+
+### initializeOta([options])
 
 Returns an object that can get valid institutions for data aggregation and their prompts, as well as provide means to start, stop and resume the aggregation.
 
-* `instCode` \<String> An institution code that is registered in the eWise PDV.
-* `prompts` Array\<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
-* `jwt` \<String> A valid eWise-issued JWT.
-* Returns: `OTAControlObject`
+* `options` \<Object>
+  * `instCode` \<String> An institution code that is registered in the eWise PDV.
+  * `prompts` Array\<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
+  * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+* Returns: `StreamControlObject`
 
-## OTAControlObject
+## StreamControlObject
 
 ### run()
 
@@ -117,9 +156,9 @@ Upon calling this function, the aggregation will return immediately run.
 
 An object that contains a stream and methods to control it. The stream filters out data when it receives duplicate events from the PDV server.
 
-* Returns: a monadic event stream which can be mapped, switched, flattened, etc. Each stream event is a `PDVPollingObject`. Subscribing to this stream will grant you access to each event.
+* Returns: a monadic event stream which can be mapped, switched, flattened, etc. Each stream event is a `PollingObject`. Subscribing to this stream will grant you access to each event.
 
-##### PDVPollingObject
+##### PollingObject
 * `processId` \<String> A string that uniquely identifies a currently running process.
 * `profileId` \<String> A string that uniquely identifies a user's account for a certain institution.
 * `status` \<String> Describes the status of the currently running process. It can be `running`, `error`, `userInput`, `stopped`, `partial`, or `done`
@@ -136,6 +175,109 @@ Resumes the aggregation if it is paused, allowing the stream to continue. Takes 
 Terminates the aggregation, which will eventually terminate the stream.
 
 * Returns: `Task(Error, {})`
+
+### addProfile([options])
+
+Returns an object that can get valid institutions for data aggregation and their prompts, as well as provide means to start, stop and resume the aggregation.
+
+* `options` \<Object>
+  * `instCode` \<String> An institution code that is registered in the eWise PDV.
+  * `prompts` Array\<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
+  * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+* Returns: `StreamControlObject`
+
+### addBasicProfile([options])
+
+Returns an object that can get valid institutions for data aggregation and their prompts, as well as provide means to start, stop and resume the aggregation.
+
+* `options` \<Object>
+  * `instCode` \<String> An institution code that is registered in the eWise PDV.
+  * `prompts` Array\<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
+  * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+* Returns: `StreamControlObject`
+
+### getProfiles([options])
+
+This function handles getting the user profiles of a user.
+
+* `options` \<Object>
+  * `profileId` \<String> A string that identifies a specific account from an institution, tenant, and user.
+  * `cred` \<String> Flag to identify if the fetch operation is to get credentials. Default: `false`
+  * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+* Returns: `Task(Error, AegisDetailsObjectResult)`
+
+### updateProfile([options])
+
+Returns an object that can get valid institutions for data aggregation and their prompts, as well as provide means to start, stop and resume the aggregation.
+
+* `options` \<Object>
+  * `profileId` \<String> A string that identifies a specific account from an institution, tenant, and user.
+  * `instCode` \<String> An institution code that is registered in the eWise PDV.
+  * `prompts` Array\<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
+  * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+* Returns: `StreamControlObject`
+
+### updateBasicProfile([options])
+
+Returns an object that can get valid institutions for data aggregation and their prompts, as well as provide means to start, stop and resume the aggregation.
+
+* `options` \<Object>
+  * `profileId` \<String> A string that identifies a specific account from an institution, tenant, and user.
+  * `instCode` \<String> An institution code that is registered in the eWise PDV.
+  * `prompts` Array\<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
+  * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+* Returns: `StreamControlObject`
+
+### getAccounts([options])
+
+This function handles getting the details of the eWise engine you are connecting to.
+
+* `options` \<Object>
+  * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+* Returns: `Task(Error, ContentAccountsObject)`
+
+##### ContentAccountsObject
+* `content` Array\<AccountsObject>
+
+##### AccountsObject
+* `accountId` \<String> A string that uniquely identifies an account from a profile owned by a user.
+* `number` \<String> The account number used by the insitution.
+* `name` \<String> The name of the account.
+* `currency` \<String> The three-letter currency of the account.
+* `type` \<Enum String> The type of account.
+* `balance` \<Number> The total balance in the account.
+* `availableBalance` \<Number> The balance that can be spent.
+* `joint` \<String> A string that can identify joint accounts across different profiles.
+* `additionalInfo` \<String> A stringified object with additional information about the account.
+* `profileId` \<String> A unique string that represents one profile owned by the user.
+* `updatedAt` \<Number> A UNIX timestamp of when the account details were last refreshed.
+
+### getTransactions([options])
+
+This function handles getting the details of the eWise engine you are connecting to.
+
+* `options` \<Object>
+  * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+* Returns: `Task(Error, AllTransactionsObject)`
+
+##### AllTransactionsObject
+* `filters` Array\<FilterObject>
+* `content` Array\<TransactionsObject>
+
+##### FilterObject
+* `property` \<String> The property of the AccountsObject being filtered.
+* `value` \<String> The condition to apply upon the property being filtered.
+
+##### TransactionsObject
+* `transactionId` \<String> A string that uniquely identifies a transaction from an account of a profile owned by a user.
+* `amount` \<String> The amount transferred in the transaction.
+* `currency` \<String> The three-letter currency of the account.
+* `date` \<String> A date in YYYY-MM-DD format describing when the transaction was posted.
+* `description` \<String> The description of the transaction.
+* `joint` \<String> A string that can identify joint accounts across different profiles.
+* `additionalInfo` \<String> A stringified object with additional information about the account.
+* `accountId` \<String> A string that uniquely identifies an account from a profile owned by a user.
+* `profileId` \<String> A unique string that represents one profile owned by the user.
 
 ## Contributing and Community Guidelines
 Please see our [contributing guide](https://github.com/ewise-systems/aegisJS/blob/develop/CONTRIBUTING.md) and our [code of conduct](https://github.com/ewise-systems/aegisJS/blob/develop/CODE_OF_CONDUCT.md) for guides on how to contribute to this project.
