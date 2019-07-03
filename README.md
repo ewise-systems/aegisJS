@@ -148,34 +148,6 @@ Returns an object that can get valid institutions for data aggregation and their
   * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
 * Returns: `StreamControlObject`
 
-## StreamControlObject
-
-### run()
-
-Upon calling this function, the aggregation will return immediately run.
-
-An object that contains a stream and methods to control it. The stream filters out data when it receives duplicate events from the PDV server.
-
-* Returns: a monadic event stream which can be mapped, switched, flattened, etc. Each stream event is a `PollingObject`. Subscribing to this stream will grant you access to each event.
-
-##### PollingObject
-* `processId` \<String> A string that uniquely identifies a currently running process.
-* `profileId` \<String> A string that uniquely identifies a user's account for a certain institution.
-* `status` \<String> Describes the status of the currently running process. It can be `running`, `error`, `userInput`, `stopped`, `partial`, or `done`
-* `type` \<String> A string that describes the type of action being performed. Can be `aggregate`.
-
-### resume(prompts)
-
-Resumes the aggregation if it is paused, allowing the stream to continue. Takes an array of Prompts as input.
-
-* Returns: `Task(Error, {})`
-
-### stop()
-
-Terminates the aggregation, which will eventually terminate the stream.
-
-* Returns: `Task(Error, {})`
-
 ### addProfile([options])
 
 Returns an object that can get valid institutions for data aggregation and their prompts, as well as provide means to start, stop and resume the aggregation.
@@ -278,6 +250,34 @@ This function handles getting the details of the eWise engine you are connecting
 * `additionalInfo` \<String> A stringified object with additional information about the account.
 * `accountId` \<String> A string that uniquely identifies an account from a profile owned by a user.
 * `profileId` \<String> A unique string that represents one profile owned by the user.
+
+## StreamControlObject
+
+### run()
+
+Upon calling this function, the aggregation will return immediately run.
+
+An object that contains a stream and methods to control it. The stream filters out data when it receives duplicate events from the PDV server.
+
+* Returns: a monadic event stream which can be mapped, switched, flattened, etc. Each stream event is a `PollingObject`. Subscribing to this stream will grant you access to each event.
+
+##### PollingObject
+* `processId` \<String> A string that uniquely identifies a currently running process.
+* `profileId` \<String> A string that uniquely identifies a user's account for a certain institution.
+* `status` \<String> Describes the status of the currently running process. It can be `running`, `error`, `userInput`, `stopped`, `partial`, or `done`
+* `type` \<String> A string that describes the type of action being performed. Can be `aggregate`.
+
+### resume(prompts)
+
+Resumes the aggregation if it is paused, allowing the stream to continue. Takes an array of Prompts as input.
+
+* Returns: `Task(Error, {})`
+
+### stop()
+
+Terminates the aggregation, which will eventually terminate the stream.
+
+* Returns: `Task(Error, {})`
 
 ## Contributing and Community Guidelines
 Please see our [contributing guide](https://github.com/ewise-systems/aegisJS/blob/develop/CONTRIBUTING.md) and our [code of conduct](https://github.com/ewise-systems/aegisJS/blob/develop/CODE_OF_CONDUCT.md) for guides on how to contribute to this project.
