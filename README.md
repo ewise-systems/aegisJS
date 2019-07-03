@@ -255,9 +255,9 @@ This function handles getting the details of the eWise engine you are connecting
 
 ### run()
 
-Upon calling this function, the aggregation will return immediately run.
+Upon calling this function, a polling stream will return immediately run.
 
-An object that contains a stream and methods to control it. The stream filters out data when it receives duplicate events from the PDV server.
+This returns an object that contains an RxJS subject and methods to control it. The stream filters out data when it receives duplicate events from the PDV server.
 
 * Returns: a monadic event stream which can be mapped, switched, flattened, etc. Each stream event is a `PollingObject`. Subscribing to this stream will grant you access to each event.
 
