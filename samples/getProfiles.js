@@ -107,4 +107,13 @@ const renderProfileToScreen = (aegis, { profileId, instCode }) => {
         );
     });
     document.getElementById("viewPort").appendChild(updateBasicProfilesBtn);
+
+    let deleteProfileBtn = document.createElement("button");
+    deleteProfileBtn.innerText = "Delete Profile";
+    deleteProfileBtn.addEventListener("click", async () => {
+        const y = aegis.deleteProfile({ profileId });
+        await y.run().promise();
+        document.getElementById("viewPort").innerHTML = "";
+    });
+    document.getElementById("viewPort").appendChild(deleteProfileBtn);
 };
