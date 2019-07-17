@@ -14,7 +14,7 @@ const doOtaRunAggregationClosure = (jwt, instCode, prompts) => {
         let viewPort = document.querySelector("#viewPort");
 
         // Handle OTP here
-        if(data.status === "userInput") {
+        if(data && data.status === "userInput") {
             let otpBox = document.createElement("section");
             otpBox.id = "otpBox";
 

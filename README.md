@@ -146,6 +146,7 @@ Returns an object that can get valid institutions for data aggregation and their
   * `instCode` \<String> An institution code that is registered in the eWise PDV.
   * `prompts` Array\<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
   * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+  * `withTransactions` \<Boolean> **Optional**. Run aggregation with transactions. Default: `true`
 * Returns: `StreamControlObject`
 
 ### addProfile([options])
@@ -156,6 +157,7 @@ Returns an object that can get valid institutions for data aggregation and their
   * `instCode` \<String> An institution code that is registered in the eWise PDV.
   * `prompts` Array\<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
   * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+  * `withTransactions` \<Boolean> **Optional**. Run aggregation with transactions. Default: `true`
 * Returns: `StreamControlObject`
 
 ### addBasicProfile([options])
@@ -166,7 +168,17 @@ Returns an object that can get valid institutions for data aggregation and their
   * `instCode` \<String> An institution code that is registered in the eWise PDV.
   * `prompts` Array\<Prompt> An array of objects. Each object is made of a `key` corresponding to the `key` returned in `getInstitutions`, and a `value` corresponding to the user-supplied credentials for that key.
   * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+  * `withTransactions` \<Boolean> **Optional**. Run aggregation with transactions. Default: `true`
 * Returns: `StreamControlObject`
+
+### deleteProfile(options)
+
+This function handles the deletion of a profile that exists under a user's account.
+
+* `options` \<Object>
+  * `profileId` \<String> A string that identifies a specific account from an institution, tenant, and user.
+  * `jwt` \<String> A valid eWise-issued JWT. Default: `defaultJwt`
+* Returns: `Task(Error, EmptyObject)`
 
 ### getProfiles([options])
 

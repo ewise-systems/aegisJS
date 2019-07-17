@@ -1,9 +1,14 @@
 const uniqid = require("uniqid");
 const { BehaviorSubject } = require("rxjs");
 const { compose, curry } = require("ramda");
-const { toObservable } = require("@ewise/aegisjs-core/frpcore/transforms");
+const { taskToObservable } = require("@ewise/aegisjs-core/frpcore/transforms");
 const { requestToAegisWithToken } = require("@ewise/aegisjs-core/hof/requestToAegis");
-const { kickstart$ } = require("@ewise/aegisjs-core/hos/pollingCore");
+const { kickstart$: initPollingStream } = require("@ewise/aegisjs-core/hos/pollingCore");
+
+const DEFAULT_REQUEST_TIMEOUT = 90000; //ms
+const DEFAULT_RETY_LIMIT = 5;
+const DEFAULT_DELAY_BEFORE_RETRY = 5000; //ms
+const DEFAULT_AGGREGATE_WITH_TRANSACTIONS = true;
 
 const HTTP_VERBS = {
     GET: "GET",
@@ -20,6 +25,7 @@ const PDV_PATHS = {
     // Add a new profile
     ADD_PROFILE: "/profiles",
     GET_PROFILES: (profileId = "", cred = false) => `/profiles/${profileId}${cred ? "/credential" : ""}`,
+    DELETE_PROFILE: (profileId) => `/profiles/${profileId}`,
 
     // Add a new basic profile
     ADD_BASIC_PROFILE: "/profiles/basic",
@@ -29,8 +35,8 @@ const PDV_PATHS = {
     RESUME_PROCESS: (pid) => `/processes/${pid}`,
 
     // Get accounts and transactions
-    GET_ACCOUNTS: "/accounts",
-    GET_TRANSACTIONS: "/transactions",
+    GET_ACCOUNTS: (accountId = "", profileId = "", accountType = "") => `/accounts/${accountId}?` + (profileId ? `&profileId=${profileId}` : "") + (accountType ? `&accountType=${accountType}` : ""),
+    GET_TRANSACTIONS: (transactionId = "", startDate = "", endDate = "", profileId = "", accountId = "") => `/transactions/${transactionId}?` + (startDate ? `&startDate=${startDate}` : "") + (endDate ? `&endDate=${endDate}` : "") + (profileId ? `&profileId=${profileId}` : "") + (accountId ? `&accountId=${accountId}` : ""),
 
     // APIs for OTA
     GET_INSTITUTIONS: (instCode = "") => `/ota/institutions/${instCode}`,
@@ -47,21 +53,22 @@ const PDV_PATHS = {
 };
 
 const createStream$ = (args = {}) => {
-    const { start, check, resume, stop } = args;
+    const { retryLimit, retryDelay, start, check, resume, stop } = args;
 
     const subject$ = new BehaviorSubject({ processId: null });
 
     const TERMINAL_PDV_STATES = ["error", "partial", "stopped", "done"];
     const stopStreamCondition = ({ status }) => TERMINAL_PDV_STATES.indexOf(status) === -1;
 
-    const initialStream$ = compose(toObservable, start);
-    const pollingStream$ = compose(toObservable, check);
-    const stream$ = kickstart$(stopStreamCondition, initialStream$, pollingStream$);
+    const initialStream$ = compose(taskToObservable, start);
+    const pollingStream$ = compose(taskToObservable, check);
+    const createStream = initPollingStream(retryLimit, retryDelay);
+    const stream$ = createStream(stopStreamCondition, initialStream$, pollingStream$);
 
     const unsafeStartExec$ = () => stream$.subscribe(
         data => subject$.next(data),
         err => subject$.error(err),
-        () => subject$.complete()
+        () => subject$.complete(subject$.getValue())
     ) && subject$;
 
     const unsafeResumeExec$ = curry(resume)(() => subject$.getValue().processId);
@@ -76,26 +83,39 @@ const createStream$ = (args = {}) => {
 };
 
 const aegis = (options = {}) => {
-    const { jwt: defaultJwt } = options;
+    const {
+        jwt: defaultJwt,
+        timeout: defaultTimeout = DEFAULT_REQUEST_TIMEOUT,
+        retryLimit: defaultRetryLimit = DEFAULT_RETY_LIMIT,
+        retryDelay: defaultRetryDelay = DEFAULT_DELAY_BEFORE_RETRY
+    } = options;
 
     return {
         getDetails: (args = {}) => {
-            const { jwtOrUrl = defaultJwt } = args;
+            const {
+                jwtOrUrl = defaultJwt,
+                timeout = defaultTimeout
+            } = args;
             return requestToAegisWithToken(
                 HTTP_VERBS.GET,
                 null,
                 null,
+                timeout,
                 PDV_PATHS.GET_DETAILS,
                 jwtOrUrl
             );
         },
 
         runBrowser: (args = {}) => {
-            const { jwtOrUrl = defaultJwt } = args;
+            const {
+                jwtOrUrl = defaultJwt,
+                timeout = defaultTimeout
+            } = args;
             return requestToAegisWithToken(
                 HTTP_VERBS.GET,
                 null,
                 null,
+                timeout,
                 PDV_PATHS.RUN_BROWSER,
                 jwtOrUrl
             );
@@ -104,12 +124,14 @@ const aegis = (options = {}) => {
         getInstitutions: (args = {}) => {
             const {
                 instCode,
-                jwt = defaultJwt
+                jwt = defaultJwt,
+                timeout = defaultTimeout
             } = args;
             return requestToAegisWithToken(
                 HTTP_VERBS.GET,
                 jwt,
                 null,
+                timeout,
                 PDV_PATHS.GET_INSTITUTIONS(instCode)
             );
         },
@@ -118,35 +140,45 @@ const aegis = (options = {}) => {
             const {
                 instCode,
                 prompts,
-                jwt = defaultJwt
+                jwt = defaultJwt,
+                timeout = defaultTimeout,
+                retryLimit = defaultRetryLimit,
+                retryDelay = defaultRetryDelay,
+                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS
             } = args;
 
             const csrf = uniqid();
-            const bodyCsrf = { code: instCode, prompts, challenge: csrf };
+            const bodyCsrf = { code: instCode, prompts, challenge: csrf, transactions };
 
             return createStream$({
+                retryLimit,
+                retryDelay,
                 start: () => requestToAegisWithToken(
                     HTTP_VERBS.POST,
                     jwt,
                     bodyCsrf,
+                    timeout,
                     PDV_PATHS.START_OTA
                 ),
                 check: pid => requestToAegisWithToken(
                     HTTP_VERBS.GET,
                     jwt,
                     null,
+                    timeout,
                     PDV_PATHS.QUERY_OTA(pid, csrf)
                 ),
                 resume: (getPid, otp) => requestToAegisWithToken(
                     HTTP_VERBS.POST,
                     jwt,
                     { ...otp, challenge: csrf },
+                    timeout,
                     PDV_PATHS.RESUME_OTA(getPid())
                 ),
                 stop: pid => requestToAegisWithToken(
                     HTTP_VERBS.DELETE,
                     jwt,
                     null,
+                    timeout,
                     PDV_PATHS.STOP_OTA(pid, csrf)
                 )
             });
@@ -156,28 +188,37 @@ const aegis = (options = {}) => {
             const {
                 instCode,
                 prompts,
-                jwt = defaultJwt
+                jwt = defaultJwt,
+                timeout = defaultTimeout,
+                retryLimit = defaultRetryLimit,
+                retryDelay = defaultRetryDelay,
+                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS
             } = args;
 
-            const body = { code: instCode, prompts };
+            const body = { code: instCode, prompts, transactions };
 
             return createStream$({
+                retryLimit,
+                retryDelay,
                 start: () => requestToAegisWithToken(
                     HTTP_VERBS.POST,
                     jwt,
                     body,
+                    timeout,
                     PDV_PATHS.ADD_PROFILE
                 ),
                 check: pid => requestToAegisWithToken(
                     HTTP_VERBS.GET,
                     jwt,
                     null,
+                    timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
                 resume: (getPid, prompts) => requestToAegisWithToken(
                     HTTP_VERBS.POST,
                     jwt,
                     { code: instCode, ...prompts },
+                    timeout,
                     PDV_PATHS.RESUME_PROCESS(getPid())
                 )
             });
@@ -187,43 +228,69 @@ const aegis = (options = {}) => {
             const {
                 instCode,
                 prompts,
-                jwt = defaultJwt
+                jwt = defaultJwt,
+                timeout = defaultTimeout,
+                retryLimit = defaultRetryLimit,
+                retryDelay = defaultRetryDelay,
+                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS
             } = args;
 
-            const body = { code: instCode, prompts };
+            const body = { code: instCode, prompts, transactions };
 
             return createStream$({
+                retryLimit,
+                retryDelay,
                 start: () => requestToAegisWithToken(
                     HTTP_VERBS.POST,
                     jwt,
                     body,
+                    timeout,
                     PDV_PATHS.ADD_BASIC_PROFILE
                 ),
                 check: pid => requestToAegisWithToken(
                     HTTP_VERBS.GET,
                     jwt,
                     null,
+                    timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
                 resume: (getPid, prompts) => requestToAegisWithToken(
                     HTTP_VERBS.POST,
                     jwt,
                     { code: instCode, ...prompts },
+                    timeout,
                     PDV_PATHS.RESUME_PROCESS(getPid())
                 )
             });
+        },
+
+        deleteProfile: (args = {}) => {
+            const {
+                jwt = defaultJwt,
+                profileId,
+                timeout = defaultTimeout
+            } = args;
+            return requestToAegisWithToken(
+                HTTP_VERBS.DELETE,
+                jwt,
+                null,
+                timeout,
+                PDV_PATHS.DELETE_PROFILE(profileId)
+            );
         },
 
         getProfiles: (args = {}) => {
             const {
                 profileId = "",
                 cred = false,
-                jwt = defaultJwt
+                jwt = defaultJwt,
+                timeout = defaultTimeout
             } = args;
             return requestToAegisWithToken(
                 HTTP_VERBS.GET,
                 jwt,
                 null,
+                timeout,
                 PDV_PATHS.GET_PROFILES(profileId, cred)
             );
         },
@@ -233,7 +300,10 @@ const aegis = (options = {}) => {
                 profileId,
                 instCode,
                 prompts,
-                jwt = defaultJwt
+                jwt = defaultJwt,
+                timeout = defaultTimeout,
+                retryLimit = defaultRetryLimit,
+                retryDelay = defaultRetryDelay
             } = args;
 
             const body = instCode && prompts ?
@@ -241,22 +311,27 @@ const aegis = (options = {}) => {
                 null;
             
             return createStream$({
+                retryLimit,
+                retryDelay,
                 start: () => requestToAegisWithToken(
                     HTTP_VERBS.PUT,
                     jwt,
                     body,
+                    timeout,
                     PDV_PATHS.UPDATE_PROFILE(profileId)
                 ),
                 check: pid => requestToAegisWithToken(
                     HTTP_VERBS.GET,
                     jwt,
                     null,
+                    timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
                 resume: (getPid, prompts) => requestToAegisWithToken(
                     HTTP_VERBS.POST,
                     jwt,
                     prompts,
+                    timeout,
                     PDV_PATHS.RESUME_PROCESS(getPid())
                 )
             });
@@ -267,7 +342,10 @@ const aegis = (options = {}) => {
                 profileId,
                 instCode,
                 prompts,
-                jwt = defaultJwt
+                jwt = defaultJwt,
+                timeout = defaultTimeout,
+                retryLimit = defaultRetryLimit,
+                retryDelay = defaultRetryDelay
             } = args;
 
             const body = instCode && prompts ?
@@ -275,44 +353,95 @@ const aegis = (options = {}) => {
                 null;
             
             return createStream$({
+                retryLimit,
+                retryDelay,
                 start: () => requestToAegisWithToken(
                     HTTP_VERBS.PUT,
                     jwt,
                     body,
+                    timeout,
                     PDV_PATHS.UPDATE_BASIC_PROFILE(profileId)
                 ),
                 check: pid => requestToAegisWithToken(
                     HTTP_VERBS.GET,
                     jwt,
                     null,
+                    timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
                 resume: (getPid, prompts) => requestToAegisWithToken(
                     HTTP_VERBS.POST,
                     jwt,
                     prompts,
+                    timeout,
                     PDV_PATHS.RESUME_PROCESS(getPid())
                 )
             });
         },
         
         getAccounts: (args = {}) => {
-            const { jwt = defaultJwt } = args;
+            const {
+                jwt = defaultJwt,
+                accountId,
+                profileId,
+                accountType,
+                timeout = defaultTimeout
+            } = args;
             return requestToAegisWithToken(
                 HTTP_VERBS.GET,
                 jwt,
                 null,
-                PDV_PATHS.GET_ACCOUNTS
+                timeout,
+                PDV_PATHS.GET_ACCOUNTS(accountId, profileId, accountType)
+            );
+        },
+
+        deleteAccount: (args = {}) => {
+            const {
+                jwt = defaultJwt,
+                accountId,
+                timeout = defaultTimeout
+            } = args;
+            return requestToAegisWithToken(
+                HTTP_VERBS.DELETE,
+                jwt,
+                null,
+                timeout,
+                PDV_PATHS.GET_ACCOUNTS(accountId)
             );
         },
         
         getTransactions: (args = {}) => {
-            const { jwt = defaultJwt } = args;
+            const {
+                jwt = defaultJwt,
+                transactionId,
+                startDate,
+                endDate,
+                profileId,
+                accountId,
+                timeout = defaultTimeout
+            } = args;
             return requestToAegisWithToken(
                 HTTP_VERBS.GET,
                 jwt,
                 null,
-                PDV_PATHS.GET_TRANSACTIONS
+                timeout,
+                PDV_PATHS.GET_TRANSACTIONS(transactionId, startDate, endDate, profileId, accountId)
+            );
+        },
+
+        deleteTransaction: (args = {}) => {
+            const {
+                jwt = defaultJwt,
+                transactionId,
+                timeout = defaultTimeout
+            } = args;
+            return requestToAegisWithToken(
+                HTTP_VERBS.DELETE,
+                jwt,
+                null,
+                timeout,
+                PDV_PATHS.GET_TRANSACTIONS(transactionId)
             );
         }
     };
