@@ -58,21 +58,24 @@ const createStream$ = (args = {}) => {
     const subject$ = new BehaviorSubject({ processId: null });
 
     const TERMINAL_PDV_STATES = ["error", "partial", "stopped", "done"];
-    const stopStreamCondition = ({ status }) => TERMINAL_PDV_STATES.indexOf(status) === -1;
+    const stopStreamCondition = arg => arg ? TERMINAL_PDV_STATES.indexOf(arg.status) === -1 : false;
 
-    const initialStream$ = compose(taskToObservable, start);
-    const pollingStream$ = compose(taskToObservable, check);
-    const createStream = initPollingStream(retryLimit, retryDelay);
-    const stream$ = createStream(stopStreamCondition, initialStream$, pollingStream$);
+    const initialStreamFactory = compose(taskToObservable, start);
+    const pollingStreamFactory = compose(taskToObservable, check);
+    const stream$ = initPollingStream(
+        retryLimit,
+        retryDelay,
+        stopStreamCondition,
+        initialStreamFactory,
+        pollingStreamFactory
+    );
 
     const unsafeStartExec$ = () => stream$.subscribe(
         data => subject$.next(data),
         err => subject$.error(err),
         () => subject$.complete(subject$.getValue())
     ) && subject$;
-
     const unsafeResumeExec$ = curry(resume)(() => subject$.getValue().processId);
-
     const unsafeStopExec$ = () => stop(subject$.getValue().processId);
 
     return {
@@ -87,16 +90,18 @@ const aegis = (options = {}) => {
         jwt: defaultJwt,
         timeout: defaultTimeout = DEFAULT_REQUEST_TIMEOUT,
         retryLimit: defaultRetryLimit = DEFAULT_RETY_LIMIT,
-        retryDelay: defaultRetryDelay = DEFAULT_DELAY_BEFORE_RETRY
+        retryDelay: defaultRetryDelay = DEFAULT_DELAY_BEFORE_RETRY,
+        ajaxTaskFn: defaultAjaxTaskFn = requestToAegisWithToken
     } = options;
 
     return {
         getDetails: (args = {}) => {
             const {
                 jwtOrUrl = defaultJwt,
-                timeout = defaultTimeout
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-            return requestToAegisWithToken(
+            return ajaxTaskFn(
                 HTTP_VERBS.GET,
                 null,
                 null,
@@ -109,9 +114,10 @@ const aegis = (options = {}) => {
         runBrowser: (args = {}) => {
             const {
                 jwtOrUrl = defaultJwt,
-                timeout = defaultTimeout
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-            return requestToAegisWithToken(
+            return ajaxTaskFn(
                 HTTP_VERBS.GET,
                 null,
                 null,
@@ -125,9 +131,10 @@ const aegis = (options = {}) => {
             const {
                 instCode,
                 jwt = defaultJwt,
-                timeout = defaultTimeout
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-            return requestToAegisWithToken(
+            return ajaxTaskFn(
                 HTTP_VERBS.GET,
                 jwt,
                 null,
@@ -144,7 +151,8 @@ const aegis = (options = {}) => {
                 timeout = defaultTimeout,
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
-                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS
+                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
 
             const csrf = uniqid();
@@ -153,28 +161,28 @@ const aegis = (options = {}) => {
             return createStream$({
                 retryLimit,
                 retryDelay,
-                start: () => requestToAegisWithToken(
+                start: () => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
                     bodyCsrf,
                     timeout,
                     PDV_PATHS.START_OTA
                 ),
-                check: pid => requestToAegisWithToken(
+                check: pid => ajaxTaskFn(
                     HTTP_VERBS.GET,
                     jwt,
                     null,
                     timeout,
                     PDV_PATHS.QUERY_OTA(pid, csrf)
                 ),
-                resume: (getPid, otp) => requestToAegisWithToken(
+                resume: (getPid, otp) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
                     { ...otp, challenge: csrf },
                     timeout,
                     PDV_PATHS.RESUME_OTA(getPid())
                 ),
-                stop: pid => requestToAegisWithToken(
+                stop: pid => ajaxTaskFn(
                     HTTP_VERBS.DELETE,
                     jwt,
                     null,
@@ -192,7 +200,8 @@ const aegis = (options = {}) => {
                 timeout = defaultTimeout,
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
-                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS
+                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
 
             const body = { code: instCode, prompts, transactions };
@@ -200,21 +209,21 @@ const aegis = (options = {}) => {
             return createStream$({
                 retryLimit,
                 retryDelay,
-                start: () => requestToAegisWithToken(
+                start: () => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
                     body,
                     timeout,
                     PDV_PATHS.ADD_PROFILE
                 ),
-                check: pid => requestToAegisWithToken(
+                check: pid => ajaxTaskFn(
                     HTTP_VERBS.GET,
                     jwt,
                     null,
                     timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
-                resume: (getPid, prompts) => requestToAegisWithToken(
+                resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
                     { code: instCode, ...prompts },
@@ -232,7 +241,8 @@ const aegis = (options = {}) => {
                 timeout = defaultTimeout,
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
-                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS
+                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
 
             const body = { code: instCode, prompts, transactions };
@@ -240,21 +250,21 @@ const aegis = (options = {}) => {
             return createStream$({
                 retryLimit,
                 retryDelay,
-                start: () => requestToAegisWithToken(
+                start: () => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
                     body,
                     timeout,
                     PDV_PATHS.ADD_BASIC_PROFILE
                 ),
-                check: pid => requestToAegisWithToken(
+                check: pid => ajaxTaskFn(
                     HTTP_VERBS.GET,
                     jwt,
                     null,
                     timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
-                resume: (getPid, prompts) => requestToAegisWithToken(
+                resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
                     { code: instCode, ...prompts },
@@ -268,9 +278,10 @@ const aegis = (options = {}) => {
             const {
                 jwt = defaultJwt,
                 profileId,
-                timeout = defaultTimeout
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-            return requestToAegisWithToken(
+            return ajaxTaskFn(
                 HTTP_VERBS.DELETE,
                 jwt,
                 null,
@@ -284,9 +295,10 @@ const aegis = (options = {}) => {
                 profileId = "",
                 cred = false,
                 jwt = defaultJwt,
-                timeout = defaultTimeout
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-            return requestToAegisWithToken(
+            return ajaxTaskFn(
                 HTTP_VERBS.GET,
                 jwt,
                 null,
@@ -303,7 +315,8 @@ const aegis = (options = {}) => {
                 jwt = defaultJwt,
                 timeout = defaultTimeout,
                 retryLimit = defaultRetryLimit,
-                retryDelay = defaultRetryDelay
+                retryDelay = defaultRetryDelay,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
 
             const body = instCode && prompts ?
@@ -313,21 +326,21 @@ const aegis = (options = {}) => {
             return createStream$({
                 retryLimit,
                 retryDelay,
-                start: () => requestToAegisWithToken(
+                start: () => ajaxTaskFn(
                     HTTP_VERBS.PUT,
                     jwt,
                     body,
                     timeout,
                     PDV_PATHS.UPDATE_PROFILE(profileId)
                 ),
-                check: pid => requestToAegisWithToken(
+                check: pid => ajaxTaskFn(
                     HTTP_VERBS.GET,
                     jwt,
                     null,
                     timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
-                resume: (getPid, prompts) => requestToAegisWithToken(
+                resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
                     prompts,
@@ -345,7 +358,8 @@ const aegis = (options = {}) => {
                 jwt = defaultJwt,
                 timeout = defaultTimeout,
                 retryLimit = defaultRetryLimit,
-                retryDelay = defaultRetryDelay
+                retryDelay = defaultRetryDelay,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
 
             const body = instCode && prompts ?
@@ -355,21 +369,21 @@ const aegis = (options = {}) => {
             return createStream$({
                 retryLimit,
                 retryDelay,
-                start: () => requestToAegisWithToken(
+                start: () => ajaxTaskFn(
                     HTTP_VERBS.PUT,
                     jwt,
                     body,
                     timeout,
                     PDV_PATHS.UPDATE_BASIC_PROFILE(profileId)
                 ),
-                check: pid => requestToAegisWithToken(
+                check: pid => ajaxTaskFn(
                     HTTP_VERBS.GET,
                     jwt,
                     null,
                     timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
-                resume: (getPid, prompts) => requestToAegisWithToken(
+                resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
                     prompts,
@@ -385,9 +399,10 @@ const aegis = (options = {}) => {
                 accountId,
                 profileId,
                 accountType,
-                timeout = defaultTimeout
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-            return requestToAegisWithToken(
+            return ajaxTaskFn(
                 HTTP_VERBS.GET,
                 jwt,
                 null,
@@ -400,9 +415,10 @@ const aegis = (options = {}) => {
             const {
                 jwt = defaultJwt,
                 accountId,
-                timeout = defaultTimeout
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-            return requestToAegisWithToken(
+            return ajaxTaskFn(
                 HTTP_VERBS.DELETE,
                 jwt,
                 null,
@@ -419,9 +435,10 @@ const aegis = (options = {}) => {
                 endDate,
                 profileId,
                 accountId,
-                timeout = defaultTimeout
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-            return requestToAegisWithToken(
+            return ajaxTaskFn(
                 HTTP_VERBS.GET,
                 jwt,
                 null,
@@ -434,9 +451,10 @@ const aegis = (options = {}) => {
             const {
                 jwt = defaultJwt,
                 transactionId,
-                timeout = defaultTimeout
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-            return requestToAegisWithToken(
+            return ajaxTaskFn(
                 HTTP_VERBS.DELETE,
                 jwt,
                 null,
