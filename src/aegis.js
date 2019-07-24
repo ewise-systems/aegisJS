@@ -4,10 +4,15 @@ const { compose, curry } = require("ramda");
 const { taskToObservable } = require("@ewise/aegisjs-core/frpcore/transforms");
 const { requestToAegisWithToken } = require("@ewise/aegisjs-core/hof/requestToAegis");
 const { kickstart$: initPollingStream } = require("@ewise/aegisjs-core/hos/pollingCore");
+const { kickstartpoll$: initPolling } = require("@ewise/aegisjs-core/hos/pollingCore");
+const { kickstartpollstoponerror$: initPollingStopOnError } = require("@ewise/aegisjs-core/hos/pollingCore");
+const { fromPromised } = require('folktale/concurrency/task');
+const promiseToTask = promise => fromPromised(() => promise)
 
 const DEFAULT_REQUEST_TIMEOUT = 90000; //ms
 const DEFAULT_RETY_LIMIT = 5;
 const DEFAULT_DELAY_BEFORE_RETRY = 5000; //ms
+const DEFAULT_POLLING_INTERVAL = 1000; //ms
 const DEFAULT_AGGREGATE_WITH_TRANSACTIONS = true;
 
 const HTTP_VERBS = {
@@ -85,6 +90,22 @@ const createStream$ = (args = {}) => {
     };
 };
 
+const createPromisePollingStream$ = (args = {}) => {
+    const { pollingInterval, retryLimit, retryDelay, start, pollWhile } = args;
+    const initialStream$ = compose(taskToObservable, start);
+    const createStream = initPolling(pollingInterval, retryLimit, retryDelay);
+    const stream$ = createStream(pollWhile, initialStream$);
+    return promiseToTask(stream$.toPromise())();
+}
+
+const createPromisePollingStreamStopOnError$ = (args = {}) => {
+    const { pollingInterval, start, pollWhile } = args;
+    const initialStream$ = compose(taskToObservable, start);
+    const createStream = initPollingStopOnError(pollingInterval);
+    const stream$ = createStream(pollWhile, initialStream$);
+    return promiseToTask(stream$.toPromise())();
+}
+
 const aegis = (options = {}) => {
     const {
         jwt: defaultJwt,
@@ -110,6 +131,55 @@ const aegis = (options = {}) => {
                 jwtOrUrl
             );
         },
+
+        hasStarted: (args = {}) => {
+            const {
+                jwtOrUrl = defaultJwt,
+                pollingInterval = DEFAULT_POLLING_INTERVAL,
+                timeout = 1000,
+                retryLimit = -1,
+                retryDelay = 1000,
+                pollWhile = (response) => !response
+            } = args;
+
+            return createPromisePollingStream$({
+                pollingInterval,
+                retryLimit,
+                retryDelay,
+                pollWhile,
+                start: () => requestToAegisWithToken(
+                    HTTP_VERBS.GET,
+                    null,
+                    null,
+                    timeout,
+                    PDV_PATHS.GET_DETAILS,
+                    jwtOrUrl
+                )
+            });
+        },
+
+        hasStopped: (args = {}) => {
+            const {
+                jwtOrUrl = defaultJwt,
+                pollingInterval = DEFAULT_POLLING_INTERVAL,
+                timeout = 1000,
+                pollWhile = ({aegis}) => aegis !== undefined
+            } = args;
+
+            return createPromisePollingStreamStopOnError$({
+                pollingInterval,
+                pollWhile,
+                start: () => requestToAegisWithToken(
+                    HTTP_VERBS.GET,
+                    null,
+                    null,
+                    timeout,
+                    PDV_PATHS.GET_DETAILS,
+                    jwtOrUrl
+                )
+            });
+        },
+
 
         runBrowser: (args = {}) => {
             const {
