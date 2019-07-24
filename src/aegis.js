@@ -7,7 +7,7 @@ const { kickstart$: initPollingStream } = require("@ewise/aegisjs-core/hos/polli
 const { kickstartpoll$: initPolling } = require("@ewise/aegisjs-core/hos/pollingCore");
 const { kickstartpollstoponerror$: initPollingStopOnError } = require("@ewise/aegisjs-core/hos/pollingCore");
 const { fromPromised } = require('folktale/concurrency/task');
-const promiseToTask = promise => fromPromised(() => promise)
+const promiseToTask = promise => fromPromised(() => promise);
 
 const DEFAULT_REQUEST_TIMEOUT = 90000; //ms
 const DEFAULT_RETY_LIMIT = 5;
@@ -96,7 +96,7 @@ const createPromisePollingStream$ = (args = {}) => {
     const createStream = initPolling(pollingInterval, retryLimit, retryDelay);
     const stream$ = createStream(pollWhile, initialStream$);
     return promiseToTask(stream$.toPromise())();
-}
+};
 
 const createPromisePollingStreamStopOnError$ = (args = {}) => {
     const { pollingInterval, start, pollWhile } = args;
@@ -104,7 +104,7 @@ const createPromisePollingStreamStopOnError$ = (args = {}) => {
     const createStream = initPollingStopOnError(pollingInterval);
     const stream$ = createStream(pollWhile, initialStream$);
     return promiseToTask(stream$.toPromise())();
-}
+};
 
 const aegis = (options = {}) => {
     const {
