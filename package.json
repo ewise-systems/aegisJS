@@ -36,7 +36,7 @@
     "webpack-cli": "^3.3.0"
   },
   "dependencies": {
-    "@ewise/aegisjs-core": "file:../aegisjs-core",
+    "@ewise/aegisjs-core": "0.1.2",
     "ajv": "^6.10.0",
     "axios": "^0.18.1",
     "folktale": "^2.3.2",
