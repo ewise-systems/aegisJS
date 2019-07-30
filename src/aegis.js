@@ -239,7 +239,7 @@ const aegis = (options = {}) => {
                 updateSite,
                 jwtOrUrl = defaultJwt,
                 pollingInterval = 1000,
-                timeout = 1000,
+                timeout = 5000,
                 retryLimit = -1,
                 retryDelay = 1000,
                 pollWhile = (response) => !response
