@@ -4,6 +4,7 @@ const { compose, curry } = require("ramda");
 const { taskToObservable } = require("@ewise/aegisjs-core/frpcore/transforms");
 const { requestToAegisWithToken } = require("@ewise/aegisjs-core/hof/requestToAegis");
 const { kickstart$: initPollingStream } = require("@ewise/aegisjs-core/hos/pollingCore");
+const { kickstartwithdelay$: initPollingStreamWithDelay } = require("@ewise/aegisjs-core/hos/pollingCore");
 const { kickstartpoll$: initPolling } = require("@ewise/aegisjs-core/hos/pollingCore");
 const { kickstartpollstoponerror$: initPollingStopOnError } = require("@ewise/aegisjs-core/hos/pollingCore");
 const { fromPromised } = require('folktale/concurrency/task');
@@ -54,7 +55,16 @@ const PDV_PATHS = {
     UPDATE_PROFILE: (profileId) => `/profiles/${profileId}`,
 
     // Update a basic profile
-    UPDATE_BASIC_PROFILE: (profileId) => `/profiles/${profileId}/basic`
+    UPDATE_BASIC_PROFILE: (profileId) => `/profiles/${profileId}/basic`,
+
+    // Check for updates
+    CHECK_FOR_UPDATES: (updateSite) => `/public/updates/check?site=${updateSite}`,
+    // Download updates
+    DOWNLOAD_UPDATES: "/public/updates/download",
+    // Download update process
+    DOWNLOAD_UPDATE_PROCESS: "/public/updates/process",
+    // Apply updates
+    APPLY_UPDATES: "/public/updates/apply"
 };
 
 const createStream$ = (args = {}) => {
@@ -87,6 +97,33 @@ const createStream$ = (args = {}) => {
         run: unsafeStartExec$,
         resume: unsafeResumeExec$,
         ...(stop ? {stop: unsafeStopExec$} : {})
+    };
+};
+
+const createDownloadUpdateStreams$ = (args = {}) => {
+    const TERMINAL_DOWNLOAD_STATES = ["FAILED", "READY"];
+    const pollWhile = arg => arg ? TERMINAL_DOWNLOAD_STATES.indexOf(arg.status) === -1 : false;
+    const { retryLimit, retryDelay, start, check, pollingInterval } = args;
+    const subject$ = new BehaviorSubject({});
+    const initialStreamFactory = compose(taskToObservable, start);
+    const pollingStreamFactory = compose(taskToObservable, check);
+    const stream$ = initPollingStreamWithDelay(
+        retryLimit,
+        retryDelay,
+        pollWhile,
+        initialStreamFactory,
+        pollingStreamFactory,
+        pollingInterval
+    );
+    
+    const unsafeStartExec$ = () => stream$.subscribe(
+        data => subject$.next(data),
+        err => subject$.error(err),
+        () => console.log(1, subject$.getValue()) || subject$.complete(subject$.getValue())
+    ) && subject$;
+
+    return {
+        run: unsafeStartExec$
     };
 };
 
@@ -179,7 +216,98 @@ const aegis = (options = {}) => {
                 )
             });
         },
+        
+        checkForUpdates: (args = {}) => {
+            const {
+                updateSite,
+                jwtOrUrl = defaultJwt,
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+            return ajaxTaskFn(
+                HTTP_VERBS.GET,
+                null,
+                null,
+                timeout,
+                PDV_PATHS.CHECK_FOR_UPDATES(updateSite),
+                jwtOrUrl
+            );
+        },
 
+        waitForUpdates: (args = {}) => {
+            const {
+                updateSite,
+                jwtOrUrl = defaultJwt,
+                pollingInterval = 1000,
+                timeout = 5000,
+                retryLimit = -1,
+                retryDelay = 1000,
+                pollWhile = (response) => !response
+            } = args;
+            return createPromisePollingStream$({
+                pollingInterval,
+                retryLimit,
+                retryDelay,
+                pollWhile,
+                start: () => requestToAegisWithToken(
+                    HTTP_VERBS.GET,
+                    null,
+                    null,
+                    timeout,
+                    PDV_PATHS.CHECK_FOR_UPDATES(updateSite),
+                    jwtOrUrl
+                )
+            });
+        },
+
+        downloadUpdates: (args = {}) => {
+            const {
+                pollingInterval = DEFAULT_POLLING_INTERVAL,
+                jwtOrUrl = defaultJwt,
+                timeout = defaultTimeout,
+                retryLimit = defaultRetryLimit,
+                retryDelay = defaultRetryDelay,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+
+            return createDownloadUpdateStreams$({
+                retryLimit,
+                retryDelay,
+                start: () => ajaxTaskFn(
+                    HTTP_VERBS.GET,
+                    null,
+                    null,
+                    timeout,
+                    PDV_PATHS.DOWNLOAD_UPDATES,
+                    jwtOrUrl
+                ),
+                check: pid => ajaxTaskFn(
+                    HTTP_VERBS.GET,
+                    null,
+                    null,
+                    timeout,
+                    PDV_PATHS.DOWNLOAD_UPDATE_PROCESS,
+                    jwtOrUrl
+                ),
+                pollingInterval
+            });
+        },
+
+        applyUpdates: (args = {}) => {
+            const {
+                jwtOrUrl = defaultJwt,
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+            return ajaxTaskFn(
+                HTTP_VERBS.GET,
+                null,
+                null,
+                timeout,
+                PDV_PATHS.APPLY_UPDATES,
+                jwtOrUrl
+            ); 
+        },
 
         runBrowser: (args = {}) => {
             const {
