@@ -260,7 +260,7 @@ const aegis = (options = {}) => {
             });
         },
 
-        dowloadUpdates: (args = {}) => {
+        downloadUpdates: (args = {}) => {
             const {
                 pollingInterval = DEFAULT_POLLING_INTERVAL,
                 jwtOrUrl = defaultJwt,
