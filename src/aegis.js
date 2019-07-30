@@ -1,20 +1,27 @@
 const uniqid = require("uniqid");
-const { BehaviorSubject } = require("rxjs");
-const { compose, curry } = require("ramda");
-const { taskToObservable } = require("@ewise/aegisjs-core/frpcore/transforms");
+const { not } = require("ramda");
+const { isNotNil } = require("@ewise/aegisjs-core/fpcore/pointfree");
+const { addDelay } = require("@ewise/aegisjs-core/frpcore/pointfree");
 const { requestToAegisWithToken } = require("@ewise/aegisjs-core/hof/requestToAegis");
-const { kickstart$: initPollingStream } = require("@ewise/aegisjs-core/hos/pollingCore");
-const { kickstartwithdelay$: initPollingStreamWithDelay } = require("@ewise/aegisjs-core/hos/pollingCore");
-const { kickstartpoll$: initPolling } = require("@ewise/aegisjs-core/hos/pollingCore");
-const { kickstartpollstoponerror$: initPollingStopOnError } = require("@ewise/aegisjs-core/hos/pollingCore");
-const { fromPromised } = require('folktale/concurrency/task');
-const promiseToTask = promise => fromPromised(() => promise);
+const {
+    createRecursivePDVPollStream,
+    createRecursiveDownloadPollStream,
+    createTaskFromIntervalRetryPollStream,
+    createTaskFromIntervalPollStream
+} = require("@ewise/aegisjs-core");
 
 const DEFAULT_REQUEST_TIMEOUT = 90000; //ms
+const X_REQUEST_TIMEOUT = 5000; //ms
+const RAPID_REQUEST_TIMEOUT = 1000; //ms
+
 const DEFAULT_RETY_LIMIT = 5;
+
 const DEFAULT_DELAY_BEFORE_RETRY = 5000; //ms
+const RAPID_DELAY_BEFORE_RETRY = 1000; //ms
+
 const DEFAULT_POLLING_INTERVAL = 1000; //ms
 const DEFAULT_AGGREGATE_WITH_TRANSACTIONS = true;
+const POSITIVE_INFINITY = Infinity;
 
 const HTTP_VERBS = {
     GET: "GET",
@@ -67,82 +74,6 @@ const PDV_PATHS = {
     APPLY_UPDATES: "/public/updates/apply"
 };
 
-const createStream$ = (args = {}) => {
-    const { retryLimit, retryDelay, start, check, resume, stop } = args;
-
-    const subject$ = new BehaviorSubject({ processId: null });
-
-    const TERMINAL_PDV_STATES = ["error", "partial", "stopped", "done"];
-    const stopStreamCondition = arg => arg ? TERMINAL_PDV_STATES.indexOf(arg.status) === -1 : false;
-
-    const initialStreamFactory = compose(taskToObservable, start);
-    const pollingStreamFactory = compose(taskToObservable, check);
-    const stream$ = initPollingStream(
-        retryLimit,
-        retryDelay,
-        stopStreamCondition,
-        initialStreamFactory,
-        pollingStreamFactory
-    );
-
-    const unsafeStartExec$ = () => stream$.subscribe(
-        data => subject$.next(data),
-        err => subject$.error(err),
-        () => subject$.complete(subject$.getValue())
-    ) && subject$;
-    const unsafeResumeExec$ = curry(resume)(() => subject$.getValue().processId);
-    const unsafeStopExec$ = () => stop(subject$.getValue().processId);
-
-    return {
-        run: unsafeStartExec$,
-        resume: unsafeResumeExec$,
-        ...(stop ? {stop: unsafeStopExec$} : {})
-    };
-};
-
-const createDownloadUpdateStreams$ = (args = {}) => {
-    const TERMINAL_DOWNLOAD_STATES = ["FAILED", "READY"];
-    const pollWhile = arg => arg ? TERMINAL_DOWNLOAD_STATES.indexOf(arg.status) === -1 : false;
-    const { retryLimit, retryDelay, start, check, pollingInterval } = args;
-    const subject$ = new BehaviorSubject({});
-    const initialStreamFactory = compose(taskToObservable, start);
-    const pollingStreamFactory = compose(taskToObservable, check);
-    const stream$ = initPollingStreamWithDelay(
-        retryLimit,
-        retryDelay,
-        pollWhile,
-        initialStreamFactory,
-        pollingStreamFactory,
-        pollingInterval
-    );
-    
-    const unsafeStartExec$ = () => stream$.subscribe(
-        data => subject$.next(data),
-        err => subject$.error(err),
-        () => console.log(1, subject$.getValue()) || subject$.complete(subject$.getValue())
-    ) && subject$;
-
-    return {
-        run: unsafeStartExec$
-    };
-};
-
-const createPromisePollingStream$ = (args = {}) => {
-    const { pollingInterval, retryLimit, retryDelay, start, pollWhile } = args;
-    const initialStream$ = compose(taskToObservable, start);
-    const createStream = initPolling(pollingInterval, retryLimit, retryDelay);
-    const stream$ = createStream(pollWhile, initialStream$);
-    return promiseToTask(stream$.toPromise())();
-};
-
-const createPromisePollingStreamStopOnError$ = (args = {}) => {
-    const { pollingInterval, start, pollWhile } = args;
-    const initialStream$ = compose(taskToObservable, start);
-    const createStream = initPollingStopOnError(pollingInterval);
-    const stream$ = createStream(pollWhile, initialStream$);
-    return promiseToTask(stream$.toPromise())();
-};
-
 const aegis = (options = {}) => {
     const {
         jwt: defaultJwt,
@@ -172,19 +103,19 @@ const aegis = (options = {}) => {
         hasStarted: (args = {}) => {
             const {
                 jwtOrUrl = defaultJwt,
-                pollingInterval = DEFAULT_POLLING_INTERVAL,
-                timeout = 1000,
-                retryLimit = -1,
-                retryDelay = 1000,
-                pollWhile = (response) => !response
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
+                timeout = RAPID_REQUEST_TIMEOUT,
+                retryLimit = POSITIVE_INFINITY,
+                retryDelay = RAPID_DELAY_BEFORE_RETRY,
+                pollWhile: pred = not,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-
-            return createPromisePollingStream$({
-                pollingInterval,
+            return createTaskFromIntervalRetryPollStream(
+                pollInterval,
                 retryLimit,
                 retryDelay,
-                pollWhile,
-                start: () => requestToAegisWithToken(
+                pred,
+                () => ajaxTaskFn(
                     HTTP_VERBS.GET,
                     null,
                     null,
@@ -192,21 +123,21 @@ const aegis = (options = {}) => {
                     PDV_PATHS.GET_DETAILS,
                     jwtOrUrl
                 )
-            });
+            );
         },
 
         hasStopped: (args = {}) => {
             const {
                 jwtOrUrl = defaultJwt,
-                pollingInterval = DEFAULT_POLLING_INTERVAL,
-                timeout = 1000,
-                pollWhile = ({aegis}) => aegis !== undefined
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
+                timeout = RAPID_REQUEST_TIMEOUT,
+                pollWhile: pred = isNotNil,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-
-            return createPromisePollingStreamStopOnError$({
-                pollingInterval,
-                pollWhile,
-                start: () => requestToAegisWithToken(
+            return createTaskFromIntervalPollStream(
+                pollInterval,
+                pred,
+                () => ajaxTaskFn(
                     HTTP_VERBS.GET,
                     null,
                     null,
@@ -214,7 +145,7 @@ const aegis = (options = {}) => {
                     PDV_PATHS.GET_DETAILS,
                     jwtOrUrl
                 )
-            });
+            );
         },
         
         checkForUpdates: (args = {}) => {
@@ -238,18 +169,18 @@ const aegis = (options = {}) => {
             const {
                 updateSite,
                 jwtOrUrl = defaultJwt,
-                pollingInterval = 1000,
-                timeout = 5000,
-                retryLimit = -1,
-                retryDelay = 1000,
-                pollWhile = (response) => !response
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
+                timeout = X_REQUEST_TIMEOUT,
+                retryLimit = POSITIVE_INFINITY,
+                retryDelay = RAPID_DELAY_BEFORE_RETRY,
+                pollWhile: pred = not
             } = args;
-            return createPromisePollingStream$({
-                pollingInterval,
+            return createTaskFromIntervalRetryPollStream(
+                pollInterval,
                 retryLimit,
                 retryDelay,
-                pollWhile,
-                start: () => requestToAegisWithToken(
+                pred,
+                () => requestToAegisWithToken(
                     HTTP_VERBS.GET,
                     null,
                     null,
@@ -257,12 +188,12 @@ const aegis = (options = {}) => {
                     PDV_PATHS.CHECK_FOR_UPDATES(updateSite),
                     jwtOrUrl
                 )
-            });
+            );
         },
 
         downloadUpdates: (args = {}) => {
             const {
-                pollingInterval = DEFAULT_POLLING_INTERVAL,
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
                 jwtOrUrl = defaultJwt,
                 timeout = defaultTimeout,
                 retryLimit = defaultRetryLimit,
@@ -270,7 +201,7 @@ const aegis = (options = {}) => {
                 ajaxTaskFn = defaultAjaxTaskFn
             } = args;
 
-            return createDownloadUpdateStreams$({
+            return createRecursiveDownloadPollStream({
                 retryLimit,
                 retryDelay,
                 start: () => ajaxTaskFn(
@@ -281,15 +212,15 @@ const aegis = (options = {}) => {
                     PDV_PATHS.DOWNLOAD_UPDATES,
                     jwtOrUrl
                 ),
-                check: pid => ajaxTaskFn(
+                afterCheck: addDelay(pollInterval),
+                check: () => ajaxTaskFn(
                     HTTP_VERBS.GET,
                     null,
                     null,
                     timeout,
                     PDV_PATHS.DOWNLOAD_UPDATE_PROCESS,
                     jwtOrUrl
-                ),
-                pollingInterval
+                )
             });
         },
 
@@ -356,7 +287,7 @@ const aegis = (options = {}) => {
             const csrf = uniqid();
             const bodyCsrf = { code: instCode, prompts, challenge: csrf, transactions };
 
-            return createStream$({
+            return createRecursivePDVPollStream({
                 retryLimit,
                 retryDelay,
                 start: () => ajaxTaskFn(
@@ -404,7 +335,7 @@ const aegis = (options = {}) => {
 
             const body = { code: instCode, prompts, transactions };
 
-            return createStream$({
+            return createRecursivePDVPollStream({
                 retryLimit,
                 retryDelay,
                 start: () => ajaxTaskFn(
@@ -445,7 +376,7 @@ const aegis = (options = {}) => {
 
             const body = { code: instCode, prompts, transactions };
 
-            return createStream$({
+            return createRecursivePDVPollStream({
                 retryLimit,
                 retryDelay,
                 start: () => ajaxTaskFn(
@@ -521,7 +452,7 @@ const aegis = (options = {}) => {
                 { code: instCode, prompts } :
                 null;
             
-            return createStream$({
+            return createRecursivePDVPollStream({
                 retryLimit,
                 retryDelay,
                 start: () => ajaxTaskFn(
@@ -564,7 +495,7 @@ const aegis = (options = {}) => {
                 { code: instCode, prompts } :
                 null;
             
-            return createStream$({
+            return createRecursivePDVPollStream({
                 retryLimit,
                 retryDelay,
                 start: () => ajaxTaskFn(
