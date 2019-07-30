@@ -11,8 +11,8 @@ const {
 } = require("@ewise/aegisjs-core");
 
 const DEFAULT_REQUEST_TIMEOUT = 90000; //ms
-const X_REQUEST_TIMEOUT = 5000; //ms
-const RAPID_REQUEST_TIMEOUT = 1000; //ms
+const FIVE_SECOND_REQUEST_TIMEOUT = 5000; //ms
+const ONE_SECOND_REQUEST_TIMEOUT = 1000; //ms
 
 const DEFAULT_RETY_LIMIT = 5;
 
@@ -104,7 +104,7 @@ const aegis = (options = {}) => {
             const {
                 jwtOrUrl = defaultJwt,
                 pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
-                timeout = RAPID_REQUEST_TIMEOUT,
+                timeout = ONE_SECOND_REQUEST_TIMEOUT,
                 retryLimit = POSITIVE_INFINITY,
                 retryDelay = RAPID_DELAY_BEFORE_RETRY,
                 pollWhile: pred = not,
@@ -130,7 +130,7 @@ const aegis = (options = {}) => {
             const {
                 jwtOrUrl = defaultJwt,
                 pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
-                timeout = RAPID_REQUEST_TIMEOUT,
+                timeout = ONE_SECOND_REQUEST_TIMEOUT,
                 pollWhile: pred = isNotNil,
                 ajaxTaskFn = defaultAjaxTaskFn
             } = args;
@@ -170,7 +170,7 @@ const aegis = (options = {}) => {
                 updateSite,
                 jwtOrUrl = defaultJwt,
                 pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
-                timeout = X_REQUEST_TIMEOUT,
+                timeout = FIVE_SECOND_REQUEST_TIMEOUT,
                 retryLimit = POSITIVE_INFINITY,
                 retryDelay = RAPID_DELAY_BEFORE_RETRY,
                 pollWhile: pred = not
