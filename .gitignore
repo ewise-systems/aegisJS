@@ -1,6 +1,8 @@
 node_modules/*
 artifact/*
 dist/*
+mb*
+protofile.json
 .DS_Store
 
 # .xml files
