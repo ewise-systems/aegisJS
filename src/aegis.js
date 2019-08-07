@@ -3,75 +3,30 @@ const { not } = require("ramda");
 const { isNotNil } = require("@ewise/aegisjs-core/fpcore/pointfree");
 const { addDelay } = require("@ewise/aegisjs-core/frpcore/pointfree");
 const { requestToAegisWithToken } = require("@ewise/aegisjs-core/hof/requestToAegis");
+const PDV_PATHS = require("@ewise/aegisjs-core/constants/pdvPaths");
 const {
     createRecursivePDVPollStream,
     createRecursiveDownloadPollStream,
     createTaskFromIntervalRetryPollStream,
     createTaskFromIntervalPollStream
 } = require("@ewise/aegisjs-core");
-
-const DEFAULT_REQUEST_TIMEOUT = 90000; //ms
-const FIVE_SECOND_REQUEST_TIMEOUT = 5000; //ms
-const ONE_SECOND_REQUEST_TIMEOUT = 1000; //ms
-
-const DEFAULT_RETY_LIMIT = 5;
-
-const DEFAULT_DELAY_BEFORE_RETRY = 5000; //ms
-const RAPID_DELAY_BEFORE_RETRY = 1000; //ms
-
-const DEFAULT_POLLING_INTERVAL = 1000; //ms
-const DEFAULT_AGGREGATE_WITH_TRANSACTIONS = true;
-const POSITIVE_INFINITY = Infinity;
+const {
+    DEFAULT_REQUEST_TIMEOUT,
+    FIVE_SECOND_REQUEST_TIMEOUT,
+    ONE_SECOND_REQUEST_TIMEOUT,
+    DEFAULT_RETY_LIMIT,
+    DEFAULT_DELAY_BEFORE_RETRY,
+    RAPID_DELAY_BEFORE_RETRY,
+    DEFAULT_POLLING_INTERVAL,
+    DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
+    POSITIVE_INFINITY
+} = require("@ewise/aegisjs-core/constants");
 
 const HTTP_VERBS = {
     GET: "GET",
     POST: "POST",
     PUT: "PUT",
     DELETE: "DELETE"
-};
-
-const PDV_PATHS = {
-    // APIs with no auth
-    GET_DETAILS: "/",
-    RUN_BROWSER: "/public/browser",
-
-    // Add a new profile
-    ADD_PROFILE: "/profiles",
-    GET_PROFILES: (profileId = "", cred = false) => `/profiles/${profileId}${cred ? "/credential" : ""}`,
-    DELETE_PROFILE: (profileId) => `/profiles/${profileId}`,
-
-    // Add a new basic profile
-    ADD_BASIC_PROFILE: "/profiles/basic",
-
-    // Generic APIs to get and resume processes
-    GET_PROCESS: (pid) => `/processes/${pid}`,
-    RESUME_PROCESS: (pid) => `/processes/${pid}`,
-
-    // Get accounts and transactions
-    GET_ACCOUNTS: (accountId = "", profileId = "", accountType = "") => `/accounts/${accountId}?` + (profileId ? `&profileId=${profileId}` : "") + (accountType ? `&accountType=${accountType}` : ""),
-    GET_TRANSACTIONS: (transactionId = "", startDate = "", endDate = "", profileId = "", accountId = "") => `/transactions/${transactionId}?` + (startDate ? `&startDate=${startDate}` : "") + (endDate ? `&endDate=${endDate}` : "") + (profileId ? `&profileId=${profileId}` : "") + (accountId ? `&accountId=${accountId}` : ""),
-
-    // APIs for OTA
-    GET_INSTITUTIONS: (instCode = "") => `/ota/institutions/${instCode}`,
-    START_OTA: "/ota/process",
-    QUERY_OTA: (pid, csrf = "") => `/ota/process/${pid}?challenge=${csrf}`,
-    RESUME_OTA: (pid = "") => `/ota/process/${pid}`,
-    STOP_OTA: (pid, csrf = "") => `/ota/process/${pid}?challenge=${csrf}`,
-
-    // Update a profile
-    UPDATE_PROFILE: (profileId) => `/profiles/${profileId}`,
-
-    // Update a basic profile
-    UPDATE_BASIC_PROFILE: (profileId) => `/profiles/${profileId}/basic`,
-
-    // Check for updates
-    CHECK_FOR_UPDATES: (updateSite) => `/public/updates/check?site=${updateSite}`,
-    // Download updates
-    DOWNLOAD_UPDATES: "/public/updates/download",
-    // Download update process
-    DOWNLOAD_UPDATE_PROCESS: "/public/updates/process",
-    // Apply updates
-    APPLY_UPDATES: "/public/updates/apply"
 };
 
 const aegis = (options = {}) => {
@@ -173,14 +128,15 @@ const aegis = (options = {}) => {
                 timeout = FIVE_SECOND_REQUEST_TIMEOUT,
                 retryLimit = POSITIVE_INFINITY,
                 retryDelay = RAPID_DELAY_BEFORE_RETRY,
-                pollWhile: pred = not
+                pollWhile: pred = not,
+                ajaxTaskFn = defaultAjaxTaskFn
             } = args;
             return createTaskFromIntervalRetryPollStream(
                 pollInterval,
                 retryLimit,
                 retryDelay,
                 pred,
-                () => requestToAegisWithToken(
+                () => ajaxTaskFn(
                     HTTP_VERBS.GET,
                     null,
                     null,
@@ -200,7 +156,6 @@ const aegis = (options = {}) => {
                 retryDelay = defaultRetryDelay,
                 ajaxTaskFn = defaultAjaxTaskFn
             } = args;
-
             return createRecursiveDownloadPollStream({
                 retryLimit,
                 retryDelay,
@@ -220,6 +175,13 @@ const aegis = (options = {}) => {
                     timeout,
                     PDV_PATHS.DOWNLOAD_UPDATE_PROCESS,
                     jwtOrUrl
+                ),
+                stop: pid => ajaxTaskFn(
+                    HTTP_VERBS.DELETE,
+                    null,
+                    null,
+                    timeout,
+                    PDV_PATHS.STOP_PROCESS(pid)
                 )
             });
         },
@@ -355,9 +317,107 @@ const aegis = (options = {}) => {
                 resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
-                    { code: instCode, ...prompts },
+                    { ...prompts },
                     timeout,
                     PDV_PATHS.RESUME_PROCESS(getPid())
+                ),
+                stop: pid => ajaxTaskFn(
+                    HTTP_VERBS.DELETE,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.STOP_PROCESS(pid)
+                )
+            });
+        },
+
+        addProfileAndLogin: (args = {}) => {
+            const {
+                instCode,
+                prompts,
+                jwt = defaultJwt,
+                timeout = defaultTimeout,
+                retryLimit = defaultRetryLimit,
+                retryDelay = defaultRetryDelay,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+
+            const body = { code: instCode, prompts };
+
+            return createRecursivePDVPollStream({
+                retryLimit,
+                retryDelay,
+                start: () => ajaxTaskFn(
+                    HTTP_VERBS.POST,
+                    jwt,
+                    body,
+                    timeout,
+                    PDV_PATHS.LOGIN_AND_ADD_PROFILE
+                ),
+                check: pid => ajaxTaskFn(
+                    HTTP_VERBS.GET,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.GET_PROCESS(pid)
+                ),
+                resume: (getPid, prompts) => ajaxTaskFn(
+                    HTTP_VERBS.POST,
+                    jwt,
+                    { ...prompts },
+                    timeout,
+                    PDV_PATHS.RESUME_PROCESS(getPid())
+                ),
+                stop: pid => ajaxTaskFn(
+                    HTTP_VERBS.DELETE,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.STOP_PROCESS(pid)
+                )
+            });
+        },
+
+        loginProfile: (args = {}) => {
+            const {
+                profileId,
+                jwt = defaultJwt,
+                timeout = defaultTimeout,
+                retryLimit = defaultRetryLimit,
+                retryDelay = defaultRetryDelay,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+
+            return createRecursivePDVPollStream({
+                retryLimit,
+                retryDelay,
+                start: () => ajaxTaskFn(
+                    HTTP_VERBS.GET,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.LOGIN_PROFILE(profileId)
+                ),
+                check: pid => ajaxTaskFn(
+                    HTTP_VERBS.GET,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.GET_PROCESS(pid)
+                ),
+                resume: (getPid, prompts) => ajaxTaskFn(
+                    HTTP_VERBS.POST,
+                    jwt,
+                    { ...prompts },
+                    timeout,
+                    PDV_PATHS.RESUME_PROCESS(getPid())
+                ),
+                stop: pid => ajaxTaskFn(
+                    HTTP_VERBS.DELETE,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.STOP_PROCESS(pid)
                 )
             });
         },
@@ -396,9 +456,16 @@ const aegis = (options = {}) => {
                 resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
-                    { code: instCode, ...prompts },
+                    { ...prompts },
                     timeout,
                     PDV_PATHS.RESUME_PROCESS(getPid())
+                ),
+                stop: pid => ajaxTaskFn(
+                    HTTP_VERBS.DELETE,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.STOP_PROCESS(pid)
                 )
             });
         },
@@ -475,6 +542,13 @@ const aegis = (options = {}) => {
                     prompts,
                     timeout,
                     PDV_PATHS.RESUME_PROCESS(getPid())
+                ),
+                stop: pid => ajaxTaskFn(
+                    HTTP_VERBS.DELETE,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.STOP_PROCESS(pid)
                 )
             });
         },
@@ -518,6 +592,13 @@ const aegis = (options = {}) => {
                     prompts,
                     timeout,
                     PDV_PATHS.RESUME_PROCESS(getPid())
+                ),
+                stop: pid => ajaxTaskFn(
+                    HTTP_VERBS.DELETE,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.STOP_PROCESS(pid)
                 )
             });
         },
@@ -531,12 +612,13 @@ const aegis = (options = {}) => {
                 timeout = defaultTimeout,
                 ajaxTaskFn = defaultAjaxTaskFn
             } = args;
+            const queryParams = [accountId, profileId, accountType];
             return ajaxTaskFn(
                 HTTP_VERBS.GET,
                 jwt,
                 null,
                 timeout,
-                PDV_PATHS.GET_ACCOUNTS(accountId, profileId, accountType)
+                PDV_PATHS.GET_ACCOUNTS(...queryParams)
             );
         },
 
@@ -567,12 +649,13 @@ const aegis = (options = {}) => {
                 timeout = defaultTimeout,
                 ajaxTaskFn = defaultAjaxTaskFn
             } = args;
+            const queryParams = [transactionId, startDate, endDate, profileId, accountId];
             return ajaxTaskFn(
                 HTTP_VERBS.GET,
                 jwt,
                 null,
                 timeout,
-                PDV_PATHS.GET_TRANSACTIONS(transactionId, startDate, endDate, profileId, accountId)
+                PDV_PATHS.GET_TRANSACTIONS(...queryParams)
             );
         },
 

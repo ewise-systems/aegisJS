@@ -116,4 +116,16 @@ const renderProfileToScreen = (aegis, { profileId, instCode }) => {
         document.getElementById("viewPort").innerHTML = "";
     });
     document.getElementById("viewPort").appendChild(deleteProfileBtn);
+
+    let loginProfileBtn = document.createElement("button");
+    loginProfileBtn.innerText = "Login Profile";
+    loginProfileBtn.addEventListener("click", async () => {
+        // TODO: Subscribe to stream and render data/OTP to screen
+        aegis.loginProfile({ profileId }).run().subscribe(
+            console.log,
+            console.warn,
+            () => document.getElementById("resultContainer").innerHTML = "DONE"
+        );
+    });
+    document.getElementById("viewPort").appendChild(loginProfileBtn);
 };
