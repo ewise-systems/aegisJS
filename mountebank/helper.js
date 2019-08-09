@@ -7,6 +7,13 @@ const addService = (port, contract) =>
         body: JSON.stringify(contract)
     });
 
+const writeContract = (port, stubs) => ({
+    port,
+    protocol: "http",
+    stubs
+});
+
 module.exports = {
-    addService
+    addService,
+    writeContract
 };

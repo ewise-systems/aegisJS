@@ -3,10 +3,8 @@ const { not } = require("ramda");
 const { isNotNil } = require("@ewise/aegisjs-core/fpcore/pointfree");
 const { addDelay } = require("@ewise/aegisjs-core/frpcore/pointfree");
 const { requestToAegisWithToken } = require("@ewise/aegisjs-core/hof/requestToAegis");
-const PDV_PATHS = require("@ewise/aegisjs-core/constants/pdvPaths");
 const {
-    createRecursivePDVPollStream,
-    createRecursiveDownloadPollStream,
+    createRecursivePollStream,
     createTaskFromIntervalRetryPollStream,
     createTaskFromIntervalPollStream
 } = require("@ewise/aegisjs-core");
@@ -21,13 +19,11 @@ const {
     DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
     POSITIVE_INFINITY
 } = require("@ewise/aegisjs-core/constants");
+const PDV_PATHS = require("@ewise/aegisjs-core/constants/pdvPaths");
+const HTTP_VERBS = require("@ewise/aegisjs-core/constants/httpVerbs");
 
-const HTTP_VERBS = {
-    GET: "GET",
-    POST: "POST",
-    PUT: "PUT",
-    DELETE: "DELETE"
-};
+const createRecursivePDVPollStream = createRecursivePollStream("error", "partial", "stopped", "done");
+const createRecursiveDownloadPollStream = createRecursivePollStream("FAILED", "READY");
 
 const aegis = (options = {}) => {
     const {
@@ -52,6 +48,39 @@ const aegis = (options = {}) => {
                 timeout,
                 PDV_PATHS.GET_DETAILS,
                 jwtOrUrl
+            );
+        },
+
+        registerUser: (args = {}) => {
+            const {
+                pin,
+                jwt = defaultJwt,
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+            return ajaxTaskFn(
+                HTTP_VERBS.POST,
+                jwt,
+                null,
+                timeout,
+                PDV_PATHS.REGISTER_USER(pin)
+            );
+        },
+
+        loginUser: (args = {}) => {
+            const {
+                url,
+                data,
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+            return ajaxTaskFn(
+                HTTP_VERBS.POST,
+                null,
+                data,
+                timeout,
+                PDV_PATHS.LOGIN_USER,
+                url
             );
         },
 
@@ -231,6 +260,22 @@ const aegis = (options = {}) => {
                 null,
                 timeout,
                 PDV_PATHS.GET_INSTITUTIONS(instCode)
+            );
+        },
+
+        getInstitutionsOta: (args = {}) => {
+            const {
+                instCode,
+                jwt = defaultJwt,
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+            return ajaxTaskFn(
+                HTTP_VERBS.GET,
+                jwt,
+                null,
+                timeout,
+                PDV_PATHS.GET_INSTITUTIONS_OTA(instCode)
             );
         },
 

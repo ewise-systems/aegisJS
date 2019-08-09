@@ -1,0 +1,11 @@
+{
+    "port": 5000,
+    "impostorPort200": 5001,
+    "payload200": {
+        "status": "done"
+    },
+    "payload500": {
+        "status": "done"
+    },
+    "impostorPort500": 5002
+}
