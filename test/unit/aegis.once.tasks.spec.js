@@ -10,10 +10,13 @@ const aegis = require("../../src/aegis");
 
 const methodsUnderTest = [
     "getDetails",
+    "registerUser",
+    "loginUser",
     "checkForUpdates",
     "applyUpdates",
     "runBrowser",
     "getInstitutions",
+    "getInstitutionsOta",
     "deleteProfile",
     "getProfiles",
     "getAccounts",
@@ -61,7 +64,7 @@ const runUnitTestSuite = aegis => ({
 
                 it("should fail when jwt body is malformed", done => {
                     const malformed = "header.s.signature";
-                    aegis[method]({ jwt: malformed, jwtOrUrl: malformed }).run().listen({
+                    aegis[method]({ jwt: malformed, jwtOrUrl: malformed, url: malformed }).run().listen({
                         onResolved: _ => done(Error("Code has reached an invalid place")),
                         onRejected: err => err.should.equal("JWT is invalid. Check the schema or aegis url.") && done(),
                     });

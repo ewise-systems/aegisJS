@@ -34,7 +34,7 @@ const runStreamUnitTestSuite = (doneStatus, ops = ["run", "resume", "stop"]) => 
                 const task = of({status:"running"});
                 const dataTask = of({status:"running",data:{}});
                 const doneTask = of({status: doneStatus});
-                const rejectedTask = rejected(500);
+                const rejectedTask = rejected({status: 500});
 
                 it("should not execute AJAX if it is only instantiated, with none of its methods invoked", done => {
                     const ajaxTaskFn = sinon.stub();
@@ -92,7 +92,7 @@ const runStreamUnitTestSuite = (doneStatus, ops = ["run", "resume", "stop"]) => 
                     ajaxTaskFn.callCount.should.equal(10);
                 });
 
-                it("should invoke its subscriber 4 times given it generates two non-terminal and one terminal signal", async () => {
+                it("should invoke its subscriber 5 times given it generates four nonrepeating events and a default", async () => {
                     const ajaxTaskFn = sinon.stub().returns(task)
                         .onCall(4).returns(dataTask)
                         .onCall(8).returns(doneTask);
@@ -100,7 +100,7 @@ const runStreamUnitTestSuite = (doneStatus, ops = ["run", "resume", "stop"]) => 
                     const x$ = aegis[method]({ ajaxTaskFn, pollingInterval: 0 }).run();
                     x$.subscribe(subscriber);
                     await x$.toPromise();
-                    subscriber.callCount.should.equal(4);
+                    subscriber.callCount.should.equal(5);
                 });
 
                 it("should invoke the error subscriber when the AJAX rejects", async () => {

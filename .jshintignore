@@ -1,5 +1,5 @@
 node_modules/*
-srv/*
+demo-app/*
 samples/*
 dist/*
 coverage/*
