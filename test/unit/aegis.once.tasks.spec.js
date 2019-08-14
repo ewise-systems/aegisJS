@@ -58,7 +58,7 @@ const runUnitTestSuite = aegis => ({
                 it("should fail when there is no given jwt", done => {
                     aegis[method]().run().listen({
                         onResolved: _ => done(Error("Code has reached an invalid place")),
-                        onRejected: err => err.should.equal("JWT was not provided.") && done(),
+                        onRejected: err => err.should.deep.equal({ code: 401 }) && done(),
                     });
                 });
 
@@ -66,7 +66,7 @@ const runUnitTestSuite = aegis => ({
                     const malformed = "header.s.signature";
                     aegis[method]({ jwt: malformed, jwtOrUrl: malformed, url: malformed }).run().listen({
                         onResolved: _ => done(Error("Code has reached an invalid place")),
-                        onRejected: err => err.should.equal("JWT is invalid. Check the schema or aegis url.") && done(),
+                        onRejected: err => err.should.deep.equal({ code: 401 }) && done(),
                     });
                 });
             });
