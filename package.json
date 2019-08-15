@@ -52,7 +52,7 @@
     "webpack-cli": "^3.3.0"
   },
   "dependencies": {
-    "@ewise/aegisjs-core": "^0.1.9",
+    "@ewise/aegisjs-core": "^0.1.10",
     "ramda": "^0.26.1",
     "rimraf": "^2.6.3",
     "uniqid": "^5.0.3"
