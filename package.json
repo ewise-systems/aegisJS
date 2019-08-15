@@ -1,6 +1,6 @@
 {
   "name": "@ewise/aegisjs",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Open source library for interacting with eWise Systems' Aegis 2.0 architecture",
   "main": "src/aegis.js",
   "scripts": {
@@ -52,7 +52,7 @@
     "webpack-cli": "^3.3.0"
   },
   "dependencies": {
-    "@ewise/aegisjs-core": "^0.1.9",
+    "@ewise/aegisjs-core": "^0.1.10",
     "ramda": "^0.26.1",
     "rimraf": "^2.6.3",
     "uniqid": "^5.0.3"
