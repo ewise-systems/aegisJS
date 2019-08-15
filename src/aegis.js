@@ -339,6 +339,7 @@ const aegis = (options = {}) => {
 
         initializeOta: (args = {}) => {
             const {
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
                 instCode,
                 prompts,
                 jwt = defaultJwt,
@@ -369,6 +370,7 @@ const aegis = (options = {}) => {
                     timeout,
                     PDV_PATHS.QUERY_OTA(pid, csrf)
                 ),
+                afterCheck: addDelay(pollInterval),
                 resume: (getPid, otp) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
@@ -388,6 +390,7 @@ const aegis = (options = {}) => {
 
         addProfile: (args = {}) => {
             const {
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
                 instCode,
                 prompts,
                 jwt = defaultJwt,
@@ -417,6 +420,7 @@ const aegis = (options = {}) => {
                     timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
+                afterCheck: addDelay(pollInterval),
                 resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
@@ -436,6 +440,7 @@ const aegis = (options = {}) => {
 
         addProfileAndLogin: (args = {}) => {
             const {
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
                 instCode,
                 prompts,
                 jwt = defaultJwt,
@@ -464,6 +469,7 @@ const aegis = (options = {}) => {
                     timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
+                afterCheck: addDelay(pollInterval),
                 resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
@@ -483,6 +489,7 @@ const aegis = (options = {}) => {
 
         loginProfile: (args = {}) => {
             const {
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
                 profileId,
                 jwt = defaultJwt,
                 timeout = defaultTimeout,
@@ -508,6 +515,7 @@ const aegis = (options = {}) => {
                     timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
+                afterCheck: addDelay(pollInterval),
                 resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
@@ -527,6 +535,7 @@ const aegis = (options = {}) => {
 
         addBasicProfile: (args = {}) => {
             const {
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
                 instCode,
                 prompts,
                 jwt = defaultJwt,
@@ -556,6 +565,7 @@ const aegis = (options = {}) => {
                     timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
+                afterCheck: addDelay(pollInterval),
                 resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
@@ -608,6 +618,7 @@ const aegis = (options = {}) => {
 
         updateProfile: (args = {}) => {
             const {
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
                 profileId,
                 instCode,
                 prompts,
@@ -639,6 +650,7 @@ const aegis = (options = {}) => {
                     timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
+                afterCheck: addDelay(pollInterval),
                 resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
@@ -658,6 +670,7 @@ const aegis = (options = {}) => {
 
         updateBasicProfile: (args = {}) => {
             const {
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
                 profileId,
                 instCode,
                 prompts,
@@ -689,6 +702,7 @@ const aegis = (options = {}) => {
                     timeout,
                     PDV_PATHS.GET_PROCESS(pid)
                 ),
+                afterCheck: addDelay(pollInterval),
                 resume: (getPid, prompts) => ajaxTaskFn(
                     HTTP_VERBS.POST,
                     jwt,
