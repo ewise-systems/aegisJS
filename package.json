@@ -1,6 +1,6 @@
 {
   "name": "@ewise/aegisjs",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Open source library for interacting with eWise Systems' Aegis 2.0 architecture",
   "main": "src/aegis.js",
   "scripts": {
