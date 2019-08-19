@@ -2,7 +2,8 @@ const uniqid = require("uniqid");
 const { not } = require("ramda");
 const { isNotNil } = require("@ewise/aegisjs-core/fpcore/pointfree");
 const { addDelay } = require("@ewise/aegisjs-core/frpcore/pointfree");
-const { requestToAegisWithToken } = require("@ewise/aegisjs-core/hof/requestToAegis");
+const { safeMakeWebUrl } = require("@ewise/aegisjs-core/fpcore/safeOps");
+const { requestToAegisWithToken, requestToAegisServerWithToken } = require("@ewise/aegisjs-core/hof/requestToAegis");
 const {
     createRecursivePollStream,
     createTaskFromIntervalRetryPollStream,
@@ -23,6 +24,18 @@ const HTTP_VERBS = require("@ewise/aegisjs-core/constants/httpVerbs");
 
 const createRecursivePDVPollStream = createRecursivePollStream("error", "partial", "stopped", "done");
 const createRecursiveDownloadPollStream = createRecursivePollStream("FAILED", "READY");
+
+// APIs for OTA
+const PDV_OTA_PATHS = otaUrl => {
+    const writeUrl = path => otaUrl ? safeMakeWebUrl(path, otaUrl).getOrElse("") : path;
+    return {
+        GET_INSTITUTIONS: (instCode = "") => writeUrl(`/ota/institutions/${instCode}`),
+        START_OTA: writeUrl("/ota/process"),
+        QUERY_OTA: (pid, csrf = "") => writeUrl(`/ota/process/${pid}?challenge=${csrf}`),
+        RESUME_OTA: (pid = "") => writeUrl(`/ota/process/${pid}`),
+        STOP_OTA: (pid, csrf = "") => writeUrl(`/ota/process/${pid}?challenge=${csrf}`)
+    };
+};
 
 const PDV_PATHS = {
     // APIs with no auth
@@ -56,13 +69,6 @@ const PDV_PATHS = {
     // Get accounts and transactions
     GET_ACCOUNTS: (accountId = "", profileId = "", accountType = "") => `/accounts/${accountId}?` + (profileId ? `&profileId=${profileId}` : "") + (accountType ? `&accountType=${accountType}` : ""),
     GET_TRANSACTIONS: (transactionId = "", startDate = "", endDate = "", profileId = "", accountId = "") => `/transactions/${transactionId}?` + (startDate ? `&startDate=${startDate}` : "") + (endDate ? `&endDate=${endDate}` : "") + (profileId ? `&profileId=${profileId}` : "") + (accountId ? `&accountId=${accountId}` : ""),
-
-    // APIs for OTA
-    GET_INSTITUTIONS_OTA: (instCode = "") => `/ota/institutions/${instCode}`,
-    START_OTA: "/ota/process",
-    QUERY_OTA: (pid, csrf = "") => `/ota/process/${pid}?challenge=${csrf}`,
-    RESUME_OTA: (pid = "") => `/ota/process/${pid}`,
-    STOP_OTA: (pid, csrf = "") => `/ota/process/${pid}?challenge=${csrf}`,
 
     // Update a profile
     UPDATE_PROFILE: (profileId) => `/profiles/${profileId}`,
@@ -326,14 +332,15 @@ const aegis = (options = {}) => {
                 instCode,
                 jwt = defaultJwt,
                 timeout = defaultTimeout,
-                ajaxTaskFn = defaultAjaxTaskFn
+                ajaxTaskFn = defaultAjaxTaskFn,
+                otaUrl
             } = args;
             return ajaxTaskFn(
                 HTTP_VERBS.GET,
                 jwt,
                 null,
                 timeout,
-                PDV_PATHS.GET_INSTITUTIONS_OTA(instCode)
+                PDV_OTA_PATHS(otaUrl).GET_INSTITUTIONS(instCode)
             );
         },
 
@@ -347,43 +354,46 @@ const aegis = (options = {}) => {
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
                 withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
-                ajaxTaskFn = defaultAjaxTaskFn
+                ajaxTaskFn = defaultAjaxTaskFn,
+                otaUrl,
+                ajaxTaskFnOtaUrl = requestToAegisServerWithToken
             } = args;
 
             const csrf = uniqid();
             const bodyCsrf = { code: instCode, prompts, challenge: csrf, transactions };
+            const ajaxFn = otaUrl ? ajaxTaskFnOtaUrl : ajaxTaskFn;
 
             return createRecursivePDVPollStream({
                 retryLimit,
                 retryDelay,
-                start: () => ajaxTaskFn(
+                start: () => ajaxFn(
                     HTTP_VERBS.POST,
                     jwt,
                     bodyCsrf,
                     timeout,
-                    PDV_PATHS.START_OTA
+                    PDV_OTA_PATHS(otaUrl).START_OTA
                 ),
-                check: pid => ajaxTaskFn(
+                check: pid => ajaxFn(
                     HTTP_VERBS.GET,
                     jwt,
                     null,
                     timeout,
-                    PDV_PATHS.QUERY_OTA(pid, csrf)
+                    PDV_OTA_PATHS(otaUrl).QUERY_OTA(pid, csrf)
                 ),
                 afterCheck: addDelay(pollInterval),
-                resume: (getPid, otp) => ajaxTaskFn(
+                resume: (getPid, otp) => ajaxFn(
                     HTTP_VERBS.POST,
                     jwt,
                     { ...otp, challenge: csrf },
                     timeout,
-                    PDV_PATHS.RESUME_OTA(getPid())
+                    PDV_OTA_PATHS(otaUrl).RESUME_OTA(getPid())
                 ),
-                stop: pid => ajaxTaskFn(
+                stop: pid => ajaxFn(
                     HTTP_VERBS.DELETE,
                     jwt,
                     null,
                     timeout,
-                    PDV_PATHS.STOP_OTA(pid, csrf)
+                    PDV_OTA_PATHS(otaUrl).STOP_OTA(pid, csrf)
                 )
             });
         },
