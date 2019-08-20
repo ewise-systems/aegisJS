@@ -64,7 +64,8 @@ const PDV_PATHS = {
     // Generic APIs to get and resume processes
     GET_PROCESS: (pid) => `/processes/${pid}`,
     RESUME_PROCESS: (pid) => `/processes/${pid}`,
-    STOP_PROCESS: (pid) => `/ota/process/${pid}`,
+    STOP_PROCESS: (pid) => `/processes/${pid}`,
+    SHOW_PROCESS: (pid) => `/processes/${pid}/show`,
 
     // Get accounts and transactions
     GET_ACCOUNTS: (accountId = "", profileId = "", accountType = "") => `/accounts/${accountId}?` + (profileId ? `&profileId=${profileId}` : "") + (accountType ? `&accountType=${accountType}` : ""),
@@ -444,6 +445,13 @@ const aegis = (options = {}) => {
                     null,
                     timeout,
                     PDV_PATHS.STOP_PROCESS(pid)
+                ),
+                show: pid => ajaxTaskFn(
+                    HTTP_VERBS.GET,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.SHOW_PROCESS(pid)
                 )
             });
         },
@@ -589,6 +597,13 @@ const aegis = (options = {}) => {
                     null,
                     timeout,
                     PDV_PATHS.STOP_PROCESS(pid)
+                ),
+                show: pid => ajaxTaskFn(
+                    HTTP_VERBS.GET,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.SHOW_PROCESS(pid)
                 )
             });
         },
@@ -674,6 +689,13 @@ const aegis = (options = {}) => {
                     null,
                     timeout,
                     PDV_PATHS.STOP_PROCESS(pid)
+                ),
+                show: pid => ajaxTaskFn(
+                    HTTP_VERBS.GET,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.SHOW_PROCESS(pid)
                 )
             });
         },
@@ -726,6 +748,13 @@ const aegis = (options = {}) => {
                     null,
                     timeout,
                     PDV_PATHS.STOP_PROCESS(pid)
+                ),
+                show: pid => ajaxTaskFn(
+                    HTTP_VERBS.GET,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.SHOW_PROCESS(pid)
                 )
             });
         },
