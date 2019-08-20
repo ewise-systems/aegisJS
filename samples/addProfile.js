@@ -100,7 +100,7 @@ const renderPromptsToScreenAddProfile = (jwt, prompts) => {
 
 const doOtaRunAggregationClosureAddProfile = (jwt, instCode, prompts) => {
     const aegis = ewise_aegisJS({ jwt });    
-    const otaControls = aegis.addProfileAndLogin({ instCode, prompts });
+    const otaControls = aegis.addProfile({ instCode, prompts });
 
     // Make controls available to the console
     // Practice for dev/test only - don't do this in production
