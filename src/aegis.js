@@ -445,13 +445,6 @@ const aegis = (options = {}) => {
                     null,
                     timeout,
                     PDV_PATHS.STOP_PROCESS(pid)
-                ),
-                show: pid => ajaxTaskFn(
-                    HTTP_VERBS.GET,
-                    jwt,
-                    null,
-                    timeout,
-                    PDV_PATHS.SHOW_PROCESS(pid)
                 )
             });
         },
@@ -597,13 +590,6 @@ const aegis = (options = {}) => {
                     null,
                     timeout,
                     PDV_PATHS.STOP_PROCESS(pid)
-                ),
-                show: pid => ajaxTaskFn(
-                    HTTP_VERBS.GET,
-                    jwt,
-                    null,
-                    timeout,
-                    PDV_PATHS.SHOW_PROCESS(pid)
                 )
             });
         },
@@ -690,13 +676,6 @@ const aegis = (options = {}) => {
                     null,
                     timeout,
                     PDV_PATHS.STOP_PROCESS(pid)
-                ),
-                show: pid => ajaxTaskFn(
-                    HTTP_VERBS.GET,
-                    jwt,
-                    null,
-                    timeout,
-                    PDV_PATHS.SHOW_PROCESS(pid)
                 )
             });
         },
@@ -750,13 +729,6 @@ const aegis = (options = {}) => {
                     null,
                     timeout,
                     PDV_PATHS.STOP_PROCESS(pid)
-                ),
-                show: pid => ajaxTaskFn(
-                    HTTP_VERBS.GET,
-                    jwt,
-                    null,
-                    timeout,
-                    PDV_PATHS.SHOW_PROCESS(pid)
                 )
             });
         },
@@ -830,6 +802,22 @@ const aegis = (options = {}) => {
                 null,
                 timeout,
                 PDV_PATHS.GET_TRANSACTIONS(transactionId)
+            );
+        },
+
+        showProcess: (args = {}) => {
+            const {
+                jwt = defaultJwt,
+                processId,
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+            return ajaxTaskFn(
+                HTTP_VERBS.GET,
+                jwt,
+                null,
+                timeout,
+                PDV_PATHS.SHOW_PROCESS(processId)
             );
         }
     };
