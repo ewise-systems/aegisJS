@@ -354,14 +354,14 @@ const aegis = (options = {}) => {
                 timeout = defaultTimeout,
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
-                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
+                withTransactions: transaction = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
                 ajaxTaskFn = defaultAjaxTaskFn,
                 otaUrl,
                 ajaxTaskFnOtaUrl = requestToAegisServerWithToken
             } = args;
 
             const csrf = uniqid();
-            const bodyCsrf = { code: instCode, prompts, challenge: csrf, transactions };
+            const bodyCsrf = { code: instCode, prompts, challenge: csrf, transaction };
             const ajaxFn = otaUrl ? ajaxTaskFnOtaUrl : ajaxTaskFn;
 
             return createRecursivePDVPollStream({
@@ -408,11 +408,11 @@ const aegis = (options = {}) => {
                 timeout = defaultTimeout,
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
-                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
+                withTransactions: transaction = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
                 ajaxTaskFn = defaultAjaxTaskFn
             } = args;
 
-            const body = { code: instCode, prompts, transactions };
+            const body = { code: instCode, prompts, transaction };
 
             return createRecursivePDVPollStream({
                 retryLimit,
@@ -553,11 +553,11 @@ const aegis = (options = {}) => {
                 timeout = defaultTimeout,
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
-                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
+                withTransactions: transaction = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
                 ajaxTaskFn = defaultAjaxTaskFn
             } = args;
 
-            const body = { code: instCode, prompts, transactions };
+            const body = { code: instCode, prompts, transaction };
 
             return createRecursivePDVPollStream({
                 retryLimit,
@@ -638,12 +638,12 @@ const aegis = (options = {}) => {
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
                 ajaxTaskFn = defaultAjaxTaskFn,
-                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
+                withTransactions: transaction = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
             } = args;
 
             const body = instCode && prompts ?
                 { code: instCode, prompts } :
-                { transactions };
+                { transaction };
             
             return createRecursivePDVPollStream({
                 retryLimit,
@@ -691,12 +691,12 @@ const aegis = (options = {}) => {
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
                 ajaxTaskFn = defaultAjaxTaskFn,
-                withTransactions: transactions = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
+                withTransactions: transaction = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
             } = args;
 
             const body = instCode && prompts ?
                 { code: instCode, prompts } :
-                { transactions };
+                { transaction };
             
             return createRecursivePDVPollStream({
                 retryLimit,
