@@ -62,6 +62,7 @@ const PDV_PATHS = {
     ADD_BASIC_PROFILE: "/profiles/basic",
 
     // Generic APIs to get and resume processes
+    GET_PROCESSES: (status = "") => `/processes?status=${status}`,
     GET_PROCESS: (pid) => `/processes/${pid}`,
     RESUME_PROCESS: (pid) => `/processes/${pid}`,
     STOP_PROCESS: (pid) => `/processes/${pid}`,
@@ -819,7 +820,70 @@ const aegis = (options = {}) => {
                 timeout,
                 PDV_PATHS.SHOW_PROCESS(processId)
             );
+        },        
+
+        getProcesses: (args = {}) => {
+            const {
+                jwt = defaultJwt,
+                status = "",
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+            return ajaxTaskFn(
+                HTTP_VERBS.GET,
+                jwt,
+                null,
+                timeout,
+                PDV_PATHS.GET_PROCESSES(status)
+            );
+        },
+
+        getProcess: (args = {}) => {
+            const {
+                pollingInterval: pollInterval = DEFAULT_POLLING_INTERVAL,
+                processId: pid,
+                jwt = defaultJwt,
+                timeout = defaultTimeout,
+                retryLimit = defaultRetryLimit,
+                retryDelay = defaultRetryDelay,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+
+            return createRecursivePDVPollStream({
+                retryLimit,
+                retryDelay,
+                start: () => ajaxTaskFn(
+                    HTTP_VERBS.GET,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.GET_PROCESS(pid)
+                ),
+                check: pid => ajaxTaskFn(
+                    HTTP_VERBS.GET,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.GET_PROCESS(pid)
+                ),
+                afterCheck: addDelay(pollInterval),
+                resume: (getPid, prompts) => ajaxTaskFn(
+                    HTTP_VERBS.POST,
+                    jwt,
+                    { ...prompts },
+                    timeout,
+                    PDV_PATHS.RESUME_PROCESS(getPid())
+                ),
+                stop: pid => ajaxTaskFn(
+                    HTTP_VERBS.DELETE,
+                    jwt,
+                    null,
+                    timeout,
+                    PDV_PATHS.STOP_PROCESS(pid)
+                )
+            });
         }
+        
     };
 };
 

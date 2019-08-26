@@ -69,7 +69,7 @@ const renderProfileToScreen = (aegis, { profileId, instCode }) => {
     let getAccountsBtn = document.createElement("button");
     getAccountsBtn.innerText = "Get Accounts";
     getAccountsBtn.addEventListener("click", async () => {
-        const y = aegis.getAccounts();
+        const y = aegis.getAccounts({profileId});
         const accounts = await y.run().promise();
         document.getElementById("resultContainer").innerHTML = JSON.stringify(accounts, null, 2);
     });
@@ -78,7 +78,7 @@ const renderProfileToScreen = (aegis, { profileId, instCode }) => {
     let getTxnsBtn = document.createElement("button");
     getTxnsBtn.innerText = "Get Transactions";
     getTxnsBtn.addEventListener("click", async () => {
-        const y = aegis.getTransactions();
+        const y = aegis.getTransactions({profileId});
         const txns = await y.run().promise();
         document.getElementById("resultContainer").innerHTML = JSON.stringify(txns, null, 2);
     });
