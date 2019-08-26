@@ -5,6 +5,8 @@
         <button id="addProfile">Add Profile</button>
         <button id="addBasicProfile">Add Basic Profile</button>
         <button id="getProfiles">Get Profiles</button>
+        <button id="getProcesses">Get Processes</button>
+        <button id="getProcess">Get Process</button>
         <br/>
         <div id="viewPort"></div>
 
@@ -16,6 +18,8 @@
         <script type="text/javascript" src="/samples/addProfile.js"></script>
         <script type="text/javascript" src="/samples/addBasicProfile.js"></script>
         <script type="text/javascript" src="/samples/getProfiles.js"></script>
+        <script type="text/javascript" src="/samples/getProcesses.js"></script>
+        <script type="text/javascript" src="/samples/getProcess.js"></script>
         <script>
             document
                 .querySelector("#clear")
@@ -39,6 +43,18 @@
                 .querySelector("#getProfiles")
                 .addEventListener("click", () =>
                     getProfiles()
+            );
+
+            document
+                .querySelector("#getProcesses")
+                .addEventListener("click", () =>
+                    getProcesses()
+            );
+
+            document
+                .querySelector("#getProcess")
+                .addEventListener("click", () =>
+                    getProcess()
             );
         </script>
     </body>
