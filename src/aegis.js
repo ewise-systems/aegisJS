@@ -33,7 +33,8 @@ const PDV_OTA_PATHS = otaUrl => {
         START_OTA: writeUrl("/ota/process"),
         QUERY_OTA: (pid, csrf = "") => writeUrl(`/ota/process/${pid}?challenge=${csrf}`),
         RESUME_OTA: (pid = "") => writeUrl(`/ota/process/${pid}`),
-        STOP_OTA: (pid, csrf = "") => writeUrl(`/ota/process/${pid}?challenge=${csrf}`)
+        STOP_OTA: (pid, csrf = "") => writeUrl(`/ota/process/${pid}?challenge=${csrf}`),
+        REPORT: (pid = "") => writeUrl(`/ota/process/${pid}/report`)
     };
 };
 
@@ -67,6 +68,7 @@ const PDV_PATHS = {
     RESUME_PROCESS: (pid) => `/processes/${pid}`,
     STOP_PROCESS: (pid) => `/processes/${pid}`,
     SHOW_PROCESS: (pid) => `/processes/${pid}/show`,
+    REPORT_PROCESS: (pid) => `/processes/${pid}/report`,
 
     // Get accounts and transactions
     GET_ACCOUNTS: (accountId = "", profileId = "", accountType = "") => `/accounts/${accountId}?` + (profileId ? `&profileId=${profileId}` : "") + (accountType ? `&accountType=${accountType}` : ""),
@@ -882,6 +884,48 @@ const aegis = (options = {}) => {
                     PDV_PATHS.STOP_PROCESS(pid)
                 )
             });
+        },
+
+        reportProcess: (args = {}) => {
+            const {
+                jwt = defaultJwt,
+                processId,
+                description,
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+            
+            const body = { description };
+
+            return ajaxTaskFn(
+                HTTP_VERBS.GET,
+                jwt,
+                body,
+                timeout,
+                PDV_PATHS.REPORT_PROCESS(processId)
+            );
+        },
+
+        reportOtaProcess: (args = {}) => {
+            const {
+                jwt = defaultJwt,
+                processId: pid,
+                description,
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn,
+                otaUrl,
+                ajaxTaskFnOtaUrl = requestToAegisServerWithToken
+            } = args;
+
+            const ajaxFn = otaUrl ? ajaxTaskFnOtaUrl : ajaxTaskFn;
+            const body = { description };
+            return ajaxFn(
+                HTTP_VERBS.GET,
+                jwt,
+                body,
+                timeout,
+                PDV_OTA_PATHS(otaUrl).REPORT(pid)
+            );
         }
         
     };
