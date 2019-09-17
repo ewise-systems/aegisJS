@@ -44,8 +44,9 @@ const PDV_PATHS = {
     RUN_BROWSER: "/public/browser",
 
     // Auth APIs
-    REGISTER_USER: (pin = "1234567890") => `/register?pin=${pin}`,
-    LOGIN_USER: "/login",
+    REGISTER_USER: "/user",
+    GET_USER: "/user",
+    LOGIN_USER: "/user/login",
 
     // Add a new profile
     ADD_PROFILE: "/profiles",
@@ -126,12 +127,31 @@ const aegis = (options = {}) => {
                 timeout = defaultTimeout,
                 ajaxTaskFn = defaultAjaxTaskFn
             } = args;
+
+            const body = pin ? { pin } : null;
+
             return ajaxTaskFn(
                 HTTP_VERBS.POST,
                 jwt,
+                body,
+                timeout,
+                PDV_PATHS.REGISTER_USER
+            );
+        },
+
+        getUser: (args = {}) => {
+            const {
+                jwt = defaultJwt,
+                timeout = defaultTimeout,
+                ajaxTaskFn = defaultAjaxTaskFn
+            } = args;
+
+            return ajaxTaskFn(
+                HTTP_VERBS.GET,
+                jwt,
                 null,
                 timeout,
-                PDV_PATHS.REGISTER_USER(pin)
+                PDV_PATHS.GET_USER
             );
         },
 
