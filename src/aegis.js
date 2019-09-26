@@ -918,7 +918,7 @@ const aegis = (options = {}) => {
             const body = { description };
 
             return ajaxTaskFn(
-                HTTP_VERBS.GET,
+                HTTP_VERBS.POST,
                 jwt,
                 body,
                 timeout,
@@ -940,7 +940,7 @@ const aegis = (options = {}) => {
             const ajaxFn = otaUrl ? ajaxTaskFnOtaUrl : ajaxTaskFn;
             const body = { description };
             return ajaxFn(
-                HTTP_VERBS.GET,
+                HTTP_VERBS.POST,
                 jwt,
                 body,
                 timeout,
