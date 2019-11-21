@@ -378,7 +378,7 @@ const aegis = (options = {}) => {
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
                 withTransactions: transaction = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
-                userProfile = false,
+                userProfile: userProfile = false,
                 payload = {},
                 ajaxTaskFn = defaultAjaxTaskFn,
                 otaUrl,
@@ -434,7 +434,7 @@ const aegis = (options = {}) => {
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
                 withTransactions: transaction = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
-                userProfile = false,
+                userProfile: userProfile = false,
                 payload = {},
                 ajaxTaskFn = defaultAjaxTaskFn
             } = args;
@@ -581,7 +581,7 @@ const aegis = (options = {}) => {
                 retryLimit = defaultRetryLimit,
                 retryDelay = defaultRetryDelay,
                 withTransactions: transaction = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
-                userProfile = false,
+                userProfile: userProfile = false,
                 payload = {},
                 ajaxTaskFn = defaultAjaxTaskFn
             } = args;
@@ -668,7 +668,7 @@ const aegis = (options = {}) => {
                 retryDelay = defaultRetryDelay,
                 ajaxTaskFn = defaultAjaxTaskFn,
                 withTransactions: transaction = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
-                userProfile = false,
+                userProfile: userProfile = false,
                 payload = {},
             } = args;
 
@@ -723,7 +723,7 @@ const aegis = (options = {}) => {
                 retryDelay = defaultRetryDelay,
                 ajaxTaskFn = defaultAjaxTaskFn,
                 withTransactions: transaction = DEFAULT_AGGREGATE_WITH_TRANSACTIONS,
-                userProfile = false,
+                userProfile: userProfile = false,
                 payload = {},
             } = args;
 
