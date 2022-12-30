@@ -41,7 +41,7 @@
     "folktale": "^2.3.2",
     "jshint": "^2.10.2",
     "lodash": "^4.17.14",
-    "mocha": "^6.2.0",
+    "mocha": "^10.2.0",
     "mountebank": "^2.1.0",
     "node-fetch": "^2.6.0",
     "nyc": "^14.0.0",
